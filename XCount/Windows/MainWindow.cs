@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
+using ECommons.DalamudServices;
 using ImGuiNET;
 using ImGuiScene;
 
@@ -16,7 +17,7 @@ public class MainWindow : Window, IDisposable
     private TextureWrap Image;
     private XCPlugin Plugin;
     public MainWindow(XCPlugin plugin, TextureWrap image) : base(
-        "XCount", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        "XCount", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse|ImGuiWindowFlags.NoTitleBar)
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
@@ -35,7 +36,22 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Image(this.Image.ImGuiHandle, new Vector2(16, 16));
+        ImGui.Image(this.Image.ImGuiHandle, new Vector2(30, 30));
+        ImGui.SameLine();
+        if (ImGui.Button("设置"))
+        {
+            this.Plugin.DrawConfigUI();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("隐藏"))
+        {
+            this.Plugin.MainWindow.Toggle();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("发送命令"))
+        {
+            this.Plugin.chat.SendMessage(CountResults.ResultString(Plugin.Configuration.chatStr));
+        }
         ImGui.TextColored(ImGuiColors.DalamudRed, $"周边玩家总数 {CountResults.CountAll}");
         ImGui.Text($"战职玩家总数 {CountResults.CountWar}");
         ImGui.Text($"生产采集总数 {CountResults.CountNoWar}");
@@ -48,10 +64,6 @@ public class MainWindow : Window, IDisposable
         ImGui.Text($"初始世界：{me.CurrentWorld.GameData.Name}");
         ImGui.Text($"职业：{me.ClassJob.GameData.Name}，{me.ClassJob.GameData.DohDolJobIndex}");
 #endif
-        if (ImGui.Button("打开设置"))
-        {
-            this.Plugin.DrawConfigUI();
-        }
 
         ImGui.Spacing();
     }

@@ -7,6 +7,8 @@ using Dalamud.Game.Gui.Dtr;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using ECommons.Automation;
+using ECommons.DalamudServices;
 using System.IO;
 using XCount.Windows;
 
@@ -20,6 +22,7 @@ namespace XCount
         private const string XConfigCMD = "/xcset";
         private const string CountPlayerCMD = "/xcpc";
         private const string CountNoWarCMD = "/xcnwpc";
+        private const string SendChat = "/xcchat";
         // 监听器
         public PCWatcher watcher;
         // UI注册
@@ -29,7 +32,7 @@ namespace XCount
         public WindowSystem WindowSystem = new("XCount");
 
         private ConfigWindow ConfigWindow { get; init; }
-        private MainWindow MainWindow { get; init; }
+        public MainWindow MainWindow { get; init; }
         public DtrBarEntry dtrEntry { get; init; }
         // Service
         [PluginService][RequiredVersion("1.0")] public static Framework Framework { get; private set; } = null!;
@@ -37,6 +40,7 @@ namespace XCount
         [PluginService][RequiredVersion("1.0")] public static ChatGui ChatGui { get; private set; } = null!;
         [PluginService][RequiredVersion("1.0")] public static DtrBar DtrBar { get; private set; } = null!;
         [PluginService][RequiredVersion("1.0")] public static ClientState ClientState { get; private set; } = null!;
+        public Chat chat { get; private set; } = null!;
         // 插件初始化
         public XCPlugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -47,7 +51,8 @@ namespace XCount
 
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
-
+            ECommons.ECommonsMain.Init(pluginInterface, this);
+            chat = new Chat();
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "XC.png");
             var goatImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
@@ -82,6 +87,10 @@ namespace XCount
             {
                 HelpMessage = "返回周围不是战职的玩家总数量到聊天栏"
             });
+            this.CommandManager.AddHandler(SendChat, new CommandInfo(OnCommand)
+            {
+                HelpMessage = "发送消息到聊天（在设置菜单自定义消息）"
+            });
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
@@ -107,8 +116,13 @@ namespace XCount
             this.CommandManager.RemoveHandler(XConfigCMD);
             this.CommandManager.RemoveHandler(CountPlayerCMD);
             this.CommandManager.RemoveHandler(CountNoWarCMD);
+            this.CommandManager.RemoveHandler(SendChat);
+            ECommons.ECommonsMain.Dispose();
         }
-
+        public void sendChatMsg()
+        {
+            chat.SendMessage(CountResults.ResultString(Configuration.chatStr));
+        }
         private void OnCommand(string command, string args)
         {
             // 处理聊天栏命令
@@ -129,7 +143,11 @@ namespace XCount
             {
                 ChatGui.Print($"周围非战职玩家数量：{CountResults.CountNoWar}");
             }
-            
+            else if (command == SendChat)
+            {
+                sendChatMsg();
+            }
+
         }
 
         private void DrawUI()

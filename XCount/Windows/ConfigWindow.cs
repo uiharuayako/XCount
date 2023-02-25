@@ -13,11 +13,10 @@ public class ConfigWindow : Window, IDisposable
     private XCPlugin plugin;
     public ConfigWindow(XCPlugin plugin) : base(
         "XCount设置",
-        ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-        ImGuiWindowFlags.NoScrollWithMouse)
+        ImGuiWindowFlags.NoCollapse)
     {
-        Size = new Vector2(320, ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight() * 10);
-        SizeCondition = ImGuiCond.Always;
+        Size = new Vector2(320, ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight() * 13);
+        SizeCondition = ImGuiCond.Once;
         watcher = plugin.watcher;
         Configuration = plugin.Configuration;
         this.plugin = plugin;
@@ -27,6 +26,11 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
+        var isDisplay = plugin.MainWindow.IsOpen;
+        if (ImGui.Checkbox("显示窗口", ref isDisplay))
+        {
+            plugin.MainWindow.IsOpen = isDisplay;
+        }
         var isEnable = Configuration.EnablePlugin;
         if (ImGui.Checkbox("开启计数", ref isEnable))
         {
@@ -88,5 +92,13 @@ public class ConfigWindow : Window, IDisposable
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(CountResults.HelpMsg());
         }
+        var chatStr = Configuration.chatStr;
+        if (ImGui.InputText("发送命令", ref chatStr, 200))
+        {
+            Configuration.chatStr = chatStr;
+            Configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(CountResults.HelpMsg());
     }
 }
