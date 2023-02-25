@@ -1,12 +1,13 @@
 {
-  "Author": "Uiharu",
-  "Name": "XCount",
-  "Punchline": "计算你周围物体的数量",
-  "Description": "/xc 显示gui",
-  "InternalName": "XCount",
-  "ApplicableVersion": "any",
-  "Tags": [
-    "radar",
-    "plugin"
-  ]
+    "Author": "Uiharu",
+    "Name": "XCount",
+    "Punchline": "计算你周围物体的数量",
+    "Description": "/xc 显示gui",
+    "InternalName": "XCount",
+    "IconUrl": "https://raw.githubusercontent.com/uiharuayako/XCount/master/Data/XC.png",
+    "ApplicableVersion": "any",
+    "Tags": [
+        "radar",
+        "plugin"
+    ]
 }
