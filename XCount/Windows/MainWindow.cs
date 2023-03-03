@@ -56,6 +56,10 @@ public class MainWindow : Window, IDisposable
         ImGui.Text($"战职玩家总数 {CountResults.CountWar}");
         ImGui.Text($"生产采集总数 {CountResults.CountNoWar}");
         ImGui.Text($"跨服玩家总数 {CountResults.TravelPlayer}");
+        if (Plugin.Configuration.tempStat)
+        {
+            ImGui.Text($"累计玩家计数 {CountResults.UnionPlayer}");
+        }
         ImGui.TextColored(ImGuiColors.DalamudRed, $"玩家搜索结果");
         ImGui.TextColored(ImGuiColors.DalamudYellow,CountResults.resultListStr.ToString());
 #if DEBUG

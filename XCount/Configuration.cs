@@ -19,6 +19,8 @@ namespace XCount
         public List<string> nameList { get; set; } = new List<string>();
         // 发送聊天
         public string chatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
+        // 临时统计（合并统计）
+        public bool tempStat { get; set; } = false;
         // the below exist just to make saving less cumbersome
         [NonSerialized]
         private DalamudPluginInterface? PluginInterface;

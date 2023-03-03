@@ -10,10 +10,12 @@ namespace XCount
         private IEnumerable<PlayerCharacter> playerCharacters;
         private IEnumerable<PlayerCharacter> travelPlayers;
         private IEnumerable<PlayerCharacter> unDowPlayers;
+        private HashSet<string> tempPlayers;
         private XCPlugin plugin = null!;
         public PCWatcher(XCPlugin plugin)
         {
             CountResults.isUpdate = false;
+            tempPlayers = new HashSet<string>();
             this.plugin = plugin;
         }
         public void Enable()
@@ -25,6 +27,18 @@ namespace XCount
         {
             // 获取玩家列表
             playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>();
+            if (plugin.Configuration.tempStat && CountResults.UnionPlayer < 9999)
+            {
+                // 如果合并搜索开启，则执行：
+                foreach (PlayerCharacter character in playerCharacters)
+                {
+                    if (tempPlayers.Add(character.Name.ToString() + "@" + character.HomeWorld.GameData.Name.ToString()))
+                    {
+                        Dalamud.Logging.PluginLog.Log(character.Name.ToString());
+                    }                    
+                }
+            }
+            CountResults.UnionPlayer = tempPlayers.Count();
             CountResults.CountAll = playerCharacters.Count();
             // 不在本服的玩家
             travelPlayers = playerCharacters.Where(pc => pc.CurrentWorld.GameData.Name != pc.HomeWorld.GameData.Name);
@@ -34,6 +48,7 @@ namespace XCount
             CountResults.CountNoWar = unDowPlayers.Count();
             // 计算战职玩家数量
             CountResults.CountWar = CountResults.CountAll - unDowPlayers.Count();
+
             if (plugin.Configuration.ShowInDtr)
             {
                 // 设置状态栏
@@ -54,10 +69,15 @@ namespace XCount
                 }
             }
         }
+        public void clearTemp()
+        {
+            tempPlayers.Clear();
+        }
         // 卸载监听器
         public void Dispose()
         {
             CountResults.isUpdate = false;
+            CountResults.UnionPlayer = 0;
             XCPlugin.Framework.Update -= OnFrameworkUpdate;
         }
     }

@@ -11,6 +11,7 @@ namespace XCount
         public static int CountWar { get; set; }
         public static int CountNoWar { get; set; }
         public static int TravelPlayer { get; set; }
+        public static int UnionPlayer { get; set; }
         public static StringBuilder resultListStr { get; set; }
         // 静态构造函数
         static CountResults()
@@ -19,6 +20,7 @@ namespace XCount
             CountWar = 0;
             CountNoWar = 0;
             TravelPlayer = 0;
+            UnionPlayer = 0;
             isUpdate = false;
             resultListStr = new StringBuilder("");
         }

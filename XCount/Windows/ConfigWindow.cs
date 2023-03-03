@@ -47,6 +47,17 @@ public class ConfigWindow : Window, IDisposable
             }
             Configuration.Save();
         }
+        var enableTempStat = Configuration.tempStat;
+        if (ImGui.Checkbox("合并统计", ref enableTempStat))
+        {
+            Configuration.tempStat = enableTempStat;
+            
+            Configuration.Save();
+        }
+        if (ImGui.Button("清除累计计数"))
+        {
+            watcher.clearTemp();
+        }
         var enableNameSrarch = Configuration.enableNameSrarch;
         if (ImGui.Checkbox("搜索id", ref enableNameSrarch))
         {
