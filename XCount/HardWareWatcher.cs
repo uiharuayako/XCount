@@ -11,20 +11,6 @@ using Dalamud.Game.Gui;
 
 namespace XCount
 {
-    class HarderWare
-    {
-        public string srcName;
-        public string unitName;
-        public string data;
-
-        HarderWare(string src, string unit)
-        {
-            srcName = src;
-            unitName = unit;
-            data = "";
-        }
-    }
-
     public class HardWareWatcher : IDisposable
     {
         public bool enableWatcher;

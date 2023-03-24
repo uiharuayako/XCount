@@ -13,6 +13,20 @@
         "requested": "[2.0.0.4, )",
         "resolved": "2.0.0.4",
         "contentHash": "joGkq0Y+K9da2TD/8/felotoTuqaUPjyKFjr2aeod77e28YMEmFrwVH+r91cU9X8hs50LEEp4QTzUnIrMJgcNw=="
+      },
+      "MSIAfterburnerNET.HM": {
+        "type": "Direct",
+        "requested": "[1.0.7, )",
+        "resolved": "1.0.7",
+        "contentHash": "q+0oXO8cW+bAmNKbjOgYiI5WqXg3k5XhQBsbdkvvwRHH9o8/FiOKhiFPcZVjQvbKdQuelGoZkHqX180ShGiGog==",
+        "dependencies": {
+          "MSIAfterburnerNET.Common": "1.0.2"
+        }
+      },
+      "MSIAfterburnerNET.Common": {
+        "type": "Transitive",
+        "resolved": "1.0.2",
+        "contentHash": "5kztHvCk2/HhIBKptemL8Aer8Vqf1bkTR0P1Jz+H6r9B1bkExakkVfiB5UjMIJzhSh10jW96CLkXdi6jRZORBg=="
       }
     }
   }
