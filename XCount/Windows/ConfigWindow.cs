@@ -51,7 +51,11 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.Checkbox("合并统计", ref enableTempStat))
         {
             Configuration.tempStat = enableTempStat;
-            
+            // 如果合并统计关闭，则清空计数
+            if (!enableTempStat)
+            {
+                watcher.clearTemp();
+            }
             Configuration.Save();
         }
         if (ImGui.Button("清除累计计数"))
@@ -102,6 +106,14 @@ public class ConfigWindow : Window, IDisposable
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(CountResults.HelpMsg());
+            var unionStr = Configuration.unionStr;
+            if (ImGui.InputText("合并统计字符串", ref unionStr, 200))
+            {
+                Configuration.unionStr = unionStr;
+                Configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("只有当合并统计被开启时，才会显示在状态栏中的字符串\n占位符规则和状态栏字符串一样");
         }
         var chatStr = Configuration.chatStr;
         if (ImGui.InputText("发送命令", ref chatStr, 200))

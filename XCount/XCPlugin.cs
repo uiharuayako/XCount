@@ -23,6 +23,7 @@ namespace XCount
         private const string CountPlayerCMD = "/xcpc";
         private const string CountNoWarCMD = "/xcnwpc";
         private const string SendChat = "/xcchat";
+        private const string ClrTemp = "/xcclear";
         // 监听器
         public PCWatcher watcher;
         // UI注册
@@ -91,6 +92,11 @@ namespace XCount
             {
                 HelpMessage = "发送消息到聊天（在设置菜单自定义消息）"
             });
+            this.CommandManager.AddHandler(ClrTemp, new CommandInfo(OnCommand)
+            {
+                HelpMessage = "临时统计人数归零归零归归零"
+            });
+
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
@@ -117,6 +123,7 @@ namespace XCount
             this.CommandManager.RemoveHandler(CountPlayerCMD);
             this.CommandManager.RemoveHandler(CountNoWarCMD);
             this.CommandManager.RemoveHandler(SendChat);
+            CommandManager.RemoveHandler(ClrTemp);
             ECommons.ECommonsMain.Dispose();
         }
         public void sendChatMsg()
@@ -146,6 +153,10 @@ namespace XCount
             else if (command == SendChat)
             {
                 sendChatMsg();
+            }
+            else if (command == ClrTemp)
+            {
+                watcher.clearTemp();
             }
 
         }

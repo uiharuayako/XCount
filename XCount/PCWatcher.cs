@@ -51,8 +51,14 @@ namespace XCount
 
             if (plugin.Configuration.ShowInDtr)
             {
+                string originStr = plugin.Configuration.dtrStr;
+                // 如果开启合并统计
+                if (plugin.Configuration.tempStat)
+                {
+                    originStr += plugin.Configuration.unionStr;
+                }
                 // 设置状态栏
-                plugin.dtrEntry.Text = CountResults.ResultString(plugin.Configuration.dtrStr);
+                plugin.dtrEntry.Text = CountResults.ResultString(originStr);
             }
             // 搜索指定玩家
             if (plugin.Configuration.enableNameSrarch)
@@ -71,7 +77,12 @@ namespace XCount
         }
         public void clearTemp()
         {
-            tempPlayers.Clear();
+            Dalamud.Logging.PluginLog.Log($"人数{tempPlayers.Count}");
+            if (tempPlayers.Count > 0)
+            {
+                Dalamud.Logging.PluginLog.Log("清空人数");
+                tempPlayers.Clear();
+            }
         }
         // 卸载监听器
         public void Dispose()
