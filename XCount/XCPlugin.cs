@@ -25,6 +25,7 @@ namespace XCount
         private const string SendChat = "/xcchat";
         // 监听器
         public PCWatcher watcher;
+        public HardWareWatcher hwWatcher;
         // UI注册
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
@@ -34,6 +35,7 @@ namespace XCount
         private ConfigWindow ConfigWindow { get; init; }
         public MainWindow MainWindow { get; init; }
         public DtrBarEntry dtrEntry { get; init; }
+        public DtrBarEntry HwBarEntry { get; init; }
         // Service
         [PluginService][RequiredVersion("1.0")] public static Framework Framework { get; private set; } = null!;
         [PluginService][RequiredVersion("1.0")] public static ObjectTable ObjectTable { get; private set; } = null!;
@@ -58,6 +60,7 @@ namespace XCount
             var goatImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
             watcher = new PCWatcher(this);
             watcher.Enable();
+            hwWatcher = new HardWareWatcher(this);
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this, goatImage);
 
@@ -66,6 +69,12 @@ namespace XCount
             // 初始化dtr
             dtrEntry = DtrBar.Get(Name);
             dtrEntry.Shown = false;
+            HwBarEntry=DtrBar.Get(Name+"硬件监控");
+            HwBarEntry.Shown = false;
+            if (Configuration.enableHwStat)
+            {
+                hwWatcher.Enable();
+            }
             if (Configuration.ShowInDtr)
             {
                 loadDtr();
@@ -110,8 +119,12 @@ namespace XCount
             ConfigWindow.Dispose();
             MainWindow.Dispose();
             watcher.Dispose();
+            hwWatcher.client.Dispose();
+            hwWatcher.Dispose();
             dtrEntry.Remove();
             dtrEntry.Dispose();
+            HwBarEntry.Dispose();
+            HwBarEntry.Remove();
             this.CommandManager.RemoveHandler(CommandName);
             this.CommandManager.RemoveHandler(XConfigCMD);
             this.CommandManager.RemoveHandler(CountPlayerCMD);
