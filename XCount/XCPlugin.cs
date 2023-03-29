@@ -56,11 +56,11 @@ namespace XCount
             chat = new Chat();
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "XC.png");
-            var goatImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
+            var image = this.PluginInterface.UiBuilder.LoadImage(imagePath);
             watcher = new PCWatcher(this);
             watcher.Enable();
             ConfigWindow = new ConfigWindow(this);
-            MainWindow = new MainWindow(this, goatImage);
+            MainWindow = new MainWindow(this, image);
 
             WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
