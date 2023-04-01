@@ -39,7 +39,6 @@
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.10" />
     <PackageReference Include="ECommons" Version="2.0.0.4" />
-    <PackageReference Include="MSIAfterburnerNET.HM" Version="1.0.7" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>
