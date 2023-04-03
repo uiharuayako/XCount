@@ -58,6 +58,30 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
 
+        if (ImGui.CollapsingHeader("人数警报"))
+        {
+            var enableCountAlert = Configuration.enableCountAlert;
+            if (ImGui.Checkbox("开启人数警报", ref enableCountAlert))
+            {
+                Configuration.enableCountAlert = enableCountAlert;
+                Configuration.Save();
+            }
+            var alertCount = Configuration.alertCount;
+            if (ImGui.InputInt("人数警报阈值", ref alertCount))
+            {
+                Configuration.alertCount = alertCount;
+                Configuration.Save();
+            }
+            var countAlertRepeat = Configuration.countAlertRepeat;
+            if (ImGui.InputInt("人数警报重复间隔（秒）", ref countAlertRepeat))
+            {
+                Configuration.countAlertRepeat = countAlertRepeat;
+                Configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("当执行人数警报之后，会自动关闭人数警报，并在这\n一栏设置的秒数之后重新开启，设置0则手动开启。");
+        }
+
         var enableTempStat = Configuration.tempStat;
         if (ImGui.Checkbox("合并统计", ref enableTempStat))
         {

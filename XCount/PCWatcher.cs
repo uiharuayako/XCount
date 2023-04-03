@@ -10,26 +10,28 @@ namespace XCount
         public IEnumerable<PlayerCharacter> playerCharacters;
         public IEnumerable<PlayerCharacter> travelPlayers;
         public IEnumerable<PlayerCharacter> unDowPlayers;
-        public Dictionary<string,PlayerCharacter> tempPlayersDict;
+        public Dictionary<string, PlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
+
         public PCWatcher(XCPlugin plugin)
         {
             CountResults.isUpdate = false;
             tempPlayersDict = new Dictionary<string, PlayerCharacter>();
             this.plugin = plugin;
         }
+
         public void Enable()
         {
             CountResults.isUpdate = true;
             XCPlugin.Framework.Update += OnFrameworkUpdate;
         }
+
         public void OnFrameworkUpdate(object _)
         {
             // 获取玩家列表
             playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>();
             if (plugin.Configuration.enableDistanceSort)
             {
-
                 // 排序
                 playerCharacters = playerCharacters.OrderBy(StaticUtil.DistanceToPlayer);
             }
@@ -39,9 +41,10 @@ namespace XCount
                 // 如果合并搜索开启，则执行：
                 foreach (PlayerCharacter character in playerCharacters)
                 {
-                    tempPlayersDict[$"{character.Name.TextValue}@{character.HomeWorld.GameData.Name}"] = character;         
+                    tempPlayersDict[$"{character.Name.TextValue}@{character.HomeWorld.GameData.Name}"] = character;
                 }
             }
+
             CountResults.UnionPlayer = tempPlayersDict.Count;
             CountResults.CountAll = playerCharacters.Count();
             // 不在本服的玩家
@@ -61,9 +64,11 @@ namespace XCount
                 {
                     originStr += plugin.Configuration.unionStr;
                 }
+
                 // 设置状态栏
                 plugin.dtrEntry.Text = CountResults.ResultString(originStr);
             }
+
             // 搜索指定玩家
             if (plugin.Configuration.enableNameSrarch)
             {
@@ -80,11 +85,35 @@ namespace XCount
                             plugin.Configuration.Save();
                             plugin.chat.SendMessage($"/e 已查找到{name}!!自动关闭警报功能<se.1>");
                         }
+
                         CountResults.resultListStr.AppendLine(name);
                     }
                 }
             }
+
+            // 判断人数是否超过阈值
+            if (playerCharacters.Count() >= plugin.Configuration.alertCount)
+            {
+                if (plugin.Configuration.enableCountAlert)
+                {
+                    plugin.chat.SendMessage(
+                        $"/e 人数阈值：{plugin.Configuration.alertCount}，当前人数：{playerCharacters.Count()}<se.1><se.2>");
+                    if (playerCharacters.Count() == 2)
+                    {
+                        XCPlugin.ChatGui.PrintError("看 看 你 身 后");
+                    }
+
+                    plugin.Configuration.enableCountAlert = false;
+                    plugin.Configuration.Save();
+                    // 判断是否重复开启
+                    if (plugin.Configuration.countAlertRepeat > 0)
+                    {
+                        plugin.Reapeat().Start();
+                    }
+                }
+            }
         }
+
         public void clearTemp()
         {
             Dalamud.Logging.PluginLog.Log($"人数{tempPlayersDict.Count}");
@@ -94,6 +123,7 @@ namespace XCount
                 tempPlayersDict.Clear();
             }
         }
+
         // 卸载监听器
         public void Dispose()
         {

@@ -33,5 +33,6 @@ namespace XCount
             Vector3 selfPosition = new(XCPlugin.ClientState.LocalPlayer.Position.X, XCPlugin.ClientState.LocalPlayer.Position.Y, XCPlugin.ClientState.LocalPlayer.Position.Z);
             return Math.Max(0, Vector3.Distance(objPosition, selfPosition) - obj.HitboxRadius - XCPlugin.ClientState.LocalPlayer.HitboxRadius);
         }
+
     }
 }

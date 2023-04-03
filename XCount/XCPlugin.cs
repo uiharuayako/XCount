@@ -12,6 +12,7 @@ using ECommons.DalamudServices;
 using System.IO;
 using Dalamud.Game.Text;
 using XCount.Windows;
+using System.Threading.Tasks;
 
 namespace XCount
 {
@@ -217,6 +218,13 @@ namespace XCount
         public void DrawConfigUI()
         {
             ConfigWindow.Toggle();
+        }
+
+        public async Task Reapeat()
+        {
+            await Task.Delay(Configuration.countAlertRepeat*1000);
+            Configuration.enableCountAlert = true;
+            Configuration.Save();
         }
     }
 }
