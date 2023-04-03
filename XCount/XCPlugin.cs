@@ -18,6 +18,7 @@ namespace XCount
     public sealed class XCPlugin : IDalamudPlugin
     {
         public string Name => "XCount";
+
         // 命令列表
         private const string CommandName = "/xc";
         private const string XConfigCMD = "/xcset";
@@ -25,9 +26,12 @@ namespace XCount
         private const string CountPlayerCMD = "/xcpc";
         private const string CountNoWarCMD = "/xcnwpc";
         private const string SendChat = "/xcchat";
+
         private const string ClrTemp = "/xcclear";
+
         // 监听器
         public PCWatcher watcher;
+
         // UI注册
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
@@ -37,14 +41,32 @@ namespace XCount
         private ConfigWindow ConfigWindow { get; init; }
         public MainWindow MainWindow { get; init; }
         public PlayerListWindow PlayerListWindow { get; init; }
+
         public DtrBarEntry dtrEntry { get; init; }
+
         // Service
-        [PluginService][RequiredVersion("1.0")] public static Framework Framework { get; private set; } = null!;
-        [PluginService][RequiredVersion("1.0")] public static ObjectTable ObjectTable { get; private set; } = null!;
-        [PluginService][RequiredVersion("1.0")] public static ChatGui ChatGui { get; private set; } = null!;
-        [PluginService][RequiredVersion("1.0")] public static DtrBar DtrBar { get; private set; } = null!;
-        [PluginService][RequiredVersion("1.0")] public static ClientState ClientState { get; private set; } = null!;
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static Framework Framework { get; private set; } = null!;
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static ObjectTable ObjectTable { get; private set; } = null!;
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static ChatGui ChatGui { get; private set; } = null!;
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static DtrBar DtrBar { get; private set; } = null!;
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static ClientState ClientState { get; private set; } = null!;
+
         public Chat chat { get; private set; } = null!;
+
         // 插件初始化
         public XCPlugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -64,10 +86,16 @@ namespace XCount
             watcher.Enable();
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this, image);
-            PlayerListWindow=new PlayerListWindow(this);
+            PlayerListWindow = new PlayerListWindow(this);
             WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
             WindowSystem.AddWindow(PlayerListWindow);
+            // 初始化警报器
+            if (Configuration.enableAlert)
+            {
+                StaticUtil.EnableAlertChat = true;
+            }
+
             // 初始化dtr
             dtrEntry = DtrBar.Get(Name);
             dtrEntry.Shown = false;
@@ -79,7 +107,7 @@ namespace XCount
             this.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
                 HelpMessage = "显示XCount Gui"
-            }); 
+            });
             this.CommandManager.AddHandler(XCList, new CommandInfo(OnCommand)
             {
                 HelpMessage = "显示玩家列表"
@@ -108,15 +136,18 @@ namespace XCount
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
+
         public void loadDtr()
         {
             dtrEntry.Shown = true;
             dtrEntry.Text = "XCount";
         }
+
         public void disposeDtr()
         {
             dtrEntry.Shown = false;
         }
+
         public void Dispose()
         {
             this.WindowSystem.RemoveAllWindows();
@@ -136,10 +167,12 @@ namespace XCount
             CommandManager.RemoveHandler(ClrTemp);
             ECommons.ECommonsMain.Dispose();
         }
+
         public void sendChatMsg()
         {
             chat.SendMessage(CountResults.ResultString(Configuration.chatStr));
         }
+
         private void OnCommand(string command, string args)
         {
             // 处理聊天栏命令
@@ -148,6 +181,7 @@ namespace XCount
             {
                 MainWindow.Toggle();
             }
+
             if (command == XCList)
             {
                 PlayerListWindow.Toggle();
@@ -173,7 +207,6 @@ namespace XCount
             {
                 watcher.clearTemp();
             }
-
         }
 
         private void DrawUI()

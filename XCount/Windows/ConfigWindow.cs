@@ -11,6 +11,7 @@ public class ConfigWindow : Window, IDisposable
     private Configuration Configuration;
     private PCWatcher watcher;
     private XCPlugin plugin;
+
     public ConfigWindow(XCPlugin plugin) : base(
         "XCount设置",
         ImGuiWindowFlags.NoCollapse)
@@ -31,11 +32,13 @@ public class ConfigWindow : Window, IDisposable
         {
             plugin.MainWindow.IsOpen = isDisplay;
         }
+
         var isDisplayList = plugin.PlayerListWindow.IsOpen;
         if (ImGui.Checkbox("显示玩家列表", ref isDisplayList))
         {
             plugin.PlayerListWindow.IsOpen = isDisplayList;
         }
+
         var isEnable = Configuration.EnablePlugin;
         if (ImGui.Checkbox("开启计数", ref isEnable))
         {
@@ -45,13 +48,16 @@ public class ConfigWindow : Window, IDisposable
             {
                 watcher.Dispose();
             }
+
             // 如果 开启计数 选项开启，而且监听器已关闭，则加载
             if (isEnable && !CountResults.isUpdate)
             {
                 watcher.Enable();
             }
+
             Configuration.Save();
         }
+
         var enableTempStat = Configuration.tempStat;
         if (ImGui.Checkbox("合并统计", ref enableTempStat))
         {
@@ -61,31 +67,42 @@ public class ConfigWindow : Window, IDisposable
             {
                 watcher.clearTemp();
             }
+
             Configuration.Save();
         }
+
         if (ImGui.Button("清除累计计数"))
         {
             watcher.clearTemp();
         }
+
         var enableNameSrarch = Configuration.enableNameSrarch;
+        var enableAlert = Configuration.enableAlert;
         if (ImGui.Checkbox("搜索id", ref enableNameSrarch))
         {
             Configuration.enableNameSrarch = enableNameSrarch;
             Configuration.Save();
         }
+
         if (Configuration.enableNameSrarch)
         {
             var nameListStr = Configuration.nameListStr;
             if (ImGui.InputText("查找名单", ref nameListStr, 200))
             {
                 Configuration.nameListStr = nameListStr;
-                Configuration.nameList.Clear();
-                Configuration.nameList.AddRange(nameListStr.Split('|'));
                 Configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("输入玩家id，用|分隔");
+                ImGui.SetTooltip("输入玩家完整名称（不需要服务器），可输入多个，不支持模糊查找");
+            if (ImGui.Checkbox("开启警报", ref enableAlert))
+            {
+                Configuration.enableAlert = enableAlert;
+                StaticUtil.EnableAlertChat = enableAlert;
+                Configuration.Save();
+            }
         }
+
         var showInDtr = Configuration.ShowInDtr;
         if (ImGui.Checkbox("状态栏显示", ref showInDtr))
         {
@@ -99,8 +116,10 @@ public class ConfigWindow : Window, IDisposable
             {
                 plugin.loadDtr();
             }
+
             Configuration.Save();
         }
+
         if (Configuration.ShowInDtr)
         {
             var dtrStr = Configuration.dtrStr;
@@ -109,6 +128,7 @@ public class ConfigWindow : Window, IDisposable
                 Configuration.dtrStr = dtrStr;
                 Configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(CountResults.HelpMsg());
             var unionStr = Configuration.unionStr;
@@ -117,16 +137,26 @@ public class ConfigWindow : Window, IDisposable
                 Configuration.unionStr = unionStr;
                 Configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("只有当合并统计被开启时，才会显示在状态栏中的字符串\n占位符规则和状态栏字符串一样");
         }
+
         var chatStr = Configuration.chatStr;
         if (ImGui.InputText("发送命令", ref chatStr, 200))
         {
             Configuration.chatStr = chatStr;
             Configuration.Save();
         }
+
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(CountResults.HelpMsg());
+        if (ImGui.Button("立即发送"))
+        {
+            plugin.sendChatMsg();
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("使用命令/xcchat也可以发送哦");
     }
 }

@@ -50,8 +50,10 @@ public class MainWindow : Window, IDisposable
         ImGui.SameLine();
         if (ImGui.Button("发送命令"))
         {
-            this.Plugin.chat.SendMessage(CountResults.ResultString(Plugin.Configuration.chatStr));
+            Plugin.sendChatMsg();
         }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("使用命令/xcchat也可以发送哦");
         ImGui.TextColored(ImGuiColors.DalamudRed, $"周边玩家总数 {CountResults.CountAll}");
         ImGui.Text($"战职玩家总数 {CountResults.CountWar}");
         ImGui.Text($"生产采集总数 {CountResults.CountNoWar}");
@@ -60,8 +62,12 @@ public class MainWindow : Window, IDisposable
         {
             ImGui.Text($"累计玩家计数 {CountResults.UnionPlayer}");
         }
-        ImGui.TextColored(ImGuiColors.DalamudRed, $"玩家搜索结果");
-        ImGui.TextColored(ImGuiColors.DalamudYellow,CountResults.resultListStr.ToString());
+
+        if (Plugin.Configuration.enableNameSrarch)
+        {
+            ImGui.TextColored(ImGuiColors.DalamudRed, $"玩家搜索结果");
+            ImGui.TextColored(ImGuiColors.DalamudYellow, CountResults.resultListStr.ToString());
+        }
 #if DEBUG
         ImGui.Text($"周边物体总数 {XCPlugin.ObjectTable.Count()}");
         PlayerCharacter me = XCPlugin.ClientState.LocalPlayer;

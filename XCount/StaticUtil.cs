@@ -10,6 +10,7 @@ namespace XCount
 {
     static class StaticUtil
     {
+        public static bool EnableAlertChat=false;
         public static string ReplaceStrings(string inputString, string[] originalStrings, string[] replacementStrings)
         {
             if (originalStrings.Length != replacementStrings.Length)

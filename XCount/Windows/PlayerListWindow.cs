@@ -20,6 +20,9 @@ namespace XCount.Windows
         private List<PlayerCharacter> searchFCList;
         private string searchName;
         private string searchFC;
+        // 决定显示的元素
+        private bool displayAll;
+        private bool displayHistory;
         public PlayerListWindow(XCPlugin plugin) : base(
             "XCount玩家列表")
         {
@@ -30,6 +33,8 @@ namespace XCount.Windows
             searchFC = "";
             searchNameList = new List<PlayerCharacter>();
             searchFCList = new List<PlayerCharacter>();
+            displayAll=true;
+            displayHistory=false;
         }
 
         public void Dispose() { }
@@ -55,15 +60,27 @@ namespace XCount.Windows
                 if (ImGui.InputText("搜索名称", ref searchName, 100))
                 {
                 }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("如果人多，可能需要关闭以下的两个选项才能看见搜索结果");
                 if (ImGui.InputText("搜索部队", ref searchFC, 100))
                 {
 
                 }
-
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("如果人多，可能需要关闭以下的两个选项才能看见搜索结果");
                 if (ImGui.BeginChild("Player List", new Vector2(0f, -1f), true))
                 {
-                    if (ImGui.CollapsingHeader($"所有玩家（共{watcher.playerCharacters.Count()}）"))
+                    ImGui.Checkbox("显示当前玩家", ref displayAll);
+                    ImGui.SameLine();
+                    ImGui.Checkbox("显示累计统计", ref displayHistory);
+                    ImGui.SameLine();
+                    if(ImGui.Button("清空累计统计"))
                     {
+                        watcher.clearTemp();
+                    }
+                    if (displayAll)
+                    {
+                        ImGui.Text($"所有玩家（共{watcher.playerCharacters.Count()}）");
                         ImGui.Columns(8, "All Players");
                         ImGui.Text("昵称");
                         ImGui.NextColumn();
@@ -130,9 +147,12 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                         }
                     }
-                    if (ImGui.CollapsingHeader($"所有玩家（累计统计）（共{watcher.tempPlayers.Count}）"))
+                    if (displayHistory)
                     {
-                        ImGui.Columns(8, "All Players");
+                        ImGui.Text($"所有玩家（累计统计）（共{watcher.tempPlayersDict.Count}）");
+                        ImGui.Columns(9, "All Players");
+                        ImGui.Text("添加记录");
+                        ImGui.NextColumn();
                         ImGui.Text("昵称");
                         ImGui.NextColumn();
                         ImGui.Text("部队");
@@ -149,8 +169,11 @@ namespace XCount.Windows
                         ImGui.NextColumn();
                         ImGui.Text("ID");
                         ImGui.NextColumn();
-                        foreach (var player in watcher.tempPlayers)
+                        foreach (var playerDict in watcher.tempPlayersDict)
                         {
+                            ImGui.TextColored(ImGuiColors.DalamudViolet, playerDict.Key);
+                            ImGui.NextColumn();
+                            var player=playerDict.Value;
                             Vector4 color = ImGuiColors.DalamudGrey;
                             switch (player.ClassJob.GameData.Role)
                             {
@@ -203,6 +226,7 @@ namespace XCount.Windows
                         searchNameList = watcher.playerCharacters.Where(pc => pc.Name.TextValue.Contains(searchName)).ToList();
                         if (ImGui.CollapsingHeader($"名称搜索结果（共{searchNameList.Count}）"))
                         {
+                            ImGui.BeginChild("Name Players List");
                             ImGui.Columns(8, "Name Players");
                             ImGui.Text("昵称");
                             ImGui.NextColumn();
@@ -268,6 +292,7 @@ namespace XCount.Windows
                                 ImGui.Text(player.ObjectId.ToString());
                                 ImGui.NextColumn();
                             }
+                            ImGui.EndChild();
                         }
 
                     }

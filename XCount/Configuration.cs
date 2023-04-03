@@ -15,8 +15,9 @@ namespace XCount
         public string dtrStr { get; set; } = "人数:<all>";
         // 名单检测
         public bool enableNameSrarch { get; set; } = false;
+        // 开启警报
+        public bool enableAlert { get; set; } = false;
         public string nameListStr { get; set; }="";
-        public List<string> nameList { get; set; } = new List<string>();
         // 发送聊天
         public string chatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
         // 临时统计（合并统计）

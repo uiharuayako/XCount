@@ -10,12 +10,12 @@ namespace XCount
         public IEnumerable<PlayerCharacter> playerCharacters;
         public IEnumerable<PlayerCharacter> travelPlayers;
         public IEnumerable<PlayerCharacter> unDowPlayers;
-        public HashSet<PlayerCharacter> tempPlayers;
+        public Dictionary<string,PlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
         public PCWatcher(XCPlugin plugin)
         {
             CountResults.isUpdate = false;
-            tempPlayers = new HashSet<PlayerCharacter>();
+            tempPlayersDict = new Dictionary<string, PlayerCharacter>();
             this.plugin = plugin;
         }
         public void Enable()
@@ -39,13 +39,10 @@ namespace XCount
                 // 如果合并搜索开启，则执行：
                 foreach (PlayerCharacter character in playerCharacters)
                 {
-                    if (tempPlayers.Add(character))
-                    {
-                        Dalamud.Logging.PluginLog.Log(character.Name.ToString());
-                    }                    
+                    tempPlayersDict[$"{character.Name.TextValue}@{character.HomeWorld.GameData.Name}"] = character;         
                 }
             }
-            CountResults.UnionPlayer = tempPlayers.Count();
+            CountResults.UnionPlayer = tempPlayersDict.Count;
             CountResults.CountAll = playerCharacters.Count();
             // 不在本服的玩家
             travelPlayers = playerCharacters.Where(pc => pc.CurrentWorld.GameData.Name != pc.HomeWorld.GameData.Name);
@@ -75,8 +72,14 @@ namespace XCount
                 foreach (PlayerCharacter playerCharacter in playerCharacters)
                 {
                     string name = playerCharacter.Name.TextValue;
-                    if (plugin.Configuration.nameList.Contains(name))
+                    if (plugin.Configuration.nameListStr.Contains(name))
                     {
+                        if (plugin.Configuration.enableAlert)
+                        {
+                            plugin.Configuration.enableAlert = false;
+                            plugin.Configuration.Save();
+                            plugin.chat.SendMessage($"/e 已查找到{name}!!自动关闭警报功能<se.1>");
+                        }
                         CountResults.resultListStr.AppendLine(name);
                     }
                 }
@@ -84,11 +87,11 @@ namespace XCount
         }
         public void clearTemp()
         {
-            Dalamud.Logging.PluginLog.Log($"人数{tempPlayers.Count}");
-            if (tempPlayers.Count > 0)
+            Dalamud.Logging.PluginLog.Log($"人数{tempPlayersDict.Count}");
+            if (tempPlayersDict.Count > 0)
             {
                 Dalamud.Logging.PluginLog.Log("清空人数");
-                tempPlayers.Clear();
+                tempPlayersDict.Clear();
             }
         }
         // 卸载监听器
