@@ -7,15 +7,15 @@ namespace XCount
 {
     public class PCWatcher : IDisposable
     {
-        private IEnumerable<PlayerCharacter> playerCharacters;
-        private IEnumerable<PlayerCharacter> travelPlayers;
-        private IEnumerable<PlayerCharacter> unDowPlayers;
-        private HashSet<string> tempPlayers;
+        public IEnumerable<PlayerCharacter> playerCharacters;
+        public IEnumerable<PlayerCharacter> travelPlayers;
+        public IEnumerable<PlayerCharacter> unDowPlayers;
+        public HashSet<PlayerCharacter> tempPlayers;
         private XCPlugin plugin = null!;
         public PCWatcher(XCPlugin plugin)
         {
             CountResults.isUpdate = false;
-            tempPlayers = new HashSet<string>();
+            tempPlayers = new HashSet<PlayerCharacter>();
             this.plugin = plugin;
         }
         public void Enable()
@@ -27,12 +27,19 @@ namespace XCount
         {
             // 获取玩家列表
             playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>();
+            if (plugin.Configuration.enableDistanceSort)
+            {
+
+                // 排序
+                playerCharacters = playerCharacters.OrderBy(StaticUtil.DistanceToPlayer);
+            }
+
             if (plugin.Configuration.tempStat && CountResults.UnionPlayer < 9999)
             {
                 // 如果合并搜索开启，则执行：
                 foreach (PlayerCharacter character in playerCharacters)
                 {
-                    if (tempPlayers.Add(character.Name.ToString() + "@" + character.HomeWorld.GameData.Name.ToString()))
+                    if (tempPlayers.Add(character))
                     {
                         Dalamud.Logging.PluginLog.Log(character.Name.ToString());
                     }                    

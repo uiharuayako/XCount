@@ -10,6 +10,7 @@ using Dalamud.Plugin;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using System.IO;
+using Dalamud.Game.Text;
 using XCount.Windows;
 
 namespace XCount
@@ -20,6 +21,7 @@ namespace XCount
         // 命令列表
         private const string CommandName = "/xc";
         private const string XConfigCMD = "/xcset";
+        private const string XCList = "/xclist";
         private const string CountPlayerCMD = "/xcpc";
         private const string CountNoWarCMD = "/xcnwpc";
         private const string SendChat = "/xcchat";
@@ -34,6 +36,7 @@ namespace XCount
 
         private ConfigWindow ConfigWindow { get; init; }
         public MainWindow MainWindow { get; init; }
+        public PlayerListWindow PlayerListWindow { get; init; }
         public DtrBarEntry dtrEntry { get; init; }
         // Service
         [PluginService][RequiredVersion("1.0")] public static Framework Framework { get; private set; } = null!;
@@ -61,9 +64,10 @@ namespace XCount
             watcher.Enable();
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this, image);
-
+            PlayerListWindow=new PlayerListWindow(this);
             WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
+            WindowSystem.AddWindow(PlayerListWindow);
             // 初始化dtr
             dtrEntry = DtrBar.Get(Name);
             dtrEntry.Shown = false;
@@ -75,6 +79,10 @@ namespace XCount
             this.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
                 HelpMessage = "显示XCount Gui"
+            }); 
+            this.CommandManager.AddHandler(XCList, new CommandInfo(OnCommand)
+            {
+                HelpMessage = "显示玩家列表"
             });
             this.CommandManager.AddHandler(XConfigCMD, new CommandInfo(OnCommand)
             {
@@ -115,10 +123,12 @@ namespace XCount
 
             ConfigWindow.Dispose();
             MainWindow.Dispose();
+            PlayerListWindow.Dispose();
             watcher.Dispose();
             dtrEntry.Remove();
             dtrEntry.Dispose();
             this.CommandManager.RemoveHandler(CommandName);
+            this.CommandManager.RemoveHandler(XCList);
             this.CommandManager.RemoveHandler(XConfigCMD);
             this.CommandManager.RemoveHandler(CountPlayerCMD);
             this.CommandManager.RemoveHandler(CountNoWarCMD);
@@ -138,6 +148,10 @@ namespace XCount
             {
                 MainWindow.Toggle();
             }
+            if (command == XCList)
+            {
+                PlayerListWindow.Toggle();
+            }
             else if (command == XConfigCMD)
             {
                 ConfigWindow.Toggle();
@@ -149,6 +163,7 @@ namespace XCount
             else if (command == CountNoWarCMD)
             {
                 ChatGui.Print($"周围非战职玩家数量：{CountResults.CountNoWar}");
+                ChatGui.PrintChat(new XivChatEntry());
             }
             else if (command == SendChat)
             {

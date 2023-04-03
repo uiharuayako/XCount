@@ -31,6 +31,11 @@ public class ConfigWindow : Window, IDisposable
         {
             plugin.MainWindow.IsOpen = isDisplay;
         }
+        var isDisplayList = plugin.PlayerListWindow.IsOpen;
+        if (ImGui.Checkbox("显示玩家列表", ref isDisplayList))
+        {
+            plugin.PlayerListWindow.IsOpen = isDisplayList;
+        }
         var isEnable = Configuration.EnablePlugin;
         if (ImGui.Checkbox("开启计数", ref isEnable))
         {

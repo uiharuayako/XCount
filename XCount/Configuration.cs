@@ -22,6 +22,8 @@ namespace XCount
         // 临时统计（合并统计）
         public bool tempStat { get; set; } = false;
         public string unionStr { get; set; } = " 合并统计:<union>";
+        // 开启按距离排序
+        public bool enableDistanceSort { get; set; } = true;
         // the below exist just to make saving less cumbersome
         [NonSerialized]
         private DalamudPluginInterface? PluginInterface;
