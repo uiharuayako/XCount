@@ -146,6 +146,8 @@ namespace XCount.Windows
                             ImGui.Text(player.ObjectId.ToString());
                             ImGui.NextColumn();
                         }
+                        ImGui.Columns(1);
+
                     }
                     if (displayHistory)
                     {
@@ -220,6 +222,7 @@ namespace XCount.Windows
                             ImGui.Text(player.ObjectId.ToString());
                             ImGui.NextColumn();
                         }
+                        ImGui.Columns(1);
                     }
                     if (!searchName.Equals(""))
                     {
@@ -292,6 +295,7 @@ namespace XCount.Windows
                                 ImGui.Text(player.ObjectId.ToString());
                                 ImGui.NextColumn();
                             }
+                            ImGui.Columns(1);
                             ImGui.EndChild();
                         }
 
@@ -366,6 +370,7 @@ namespace XCount.Windows
                                 ImGui.Text(player.ObjectId.ToString());
                                 ImGui.NextColumn();
                             }
+                            ImGui.Columns(1);
                         }
 
                     }

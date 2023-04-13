@@ -16,7 +16,7 @@ public class ConfigWindow : Window, IDisposable
         "XCount设置",
         ImGuiWindowFlags.NoCollapse)
     {
-        Size = new Vector2(320, ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight() * 13);
+        Size = new Vector2(320, ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight() * 18);
         SizeCondition = ImGuiCond.Once;
         watcher = plugin.watcher;
         Configuration = plugin.Configuration;
