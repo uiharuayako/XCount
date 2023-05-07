@@ -1,3 +1,4 @@
+using System;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
@@ -10,9 +11,15 @@ using Dalamud.Plugin;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using System.IO;
+using System.Numerics;
 using Dalamud.Game.Text;
 using XCount.Windows;
 using System.Threading.Tasks;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface;
+using ImGuiNET;
+using Dalamud.Interface.Colors;
 
 namespace XCount
 {
@@ -56,7 +63,10 @@ namespace XCount
 
         [PluginService]
         [RequiredVersion("1.0")]
-        public static ChatGui ChatGui { get; private set; } = null!;
+        public static ChatGui ChatGui { get; private set; } = null!; 
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static GameGui GameGui { get; private set; } = null!;
 
         [PluginService]
         [RequiredVersion("1.0")]
@@ -67,6 +77,8 @@ namespace XCount
         public static ClientState ClientState { get; private set; } = null!;
 
         public Chat chat { get; private set; } = null!;
+
+        
 
         // 插件初始化
         public XCPlugin(
@@ -136,6 +148,7 @@ namespace XCount
 
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+            this.PluginInterface.UiBuilder.Draw += DrawTest;
         }
 
         public void loadDtr()
@@ -166,6 +179,7 @@ namespace XCount
             this.CommandManager.RemoveHandler(CountNoWarCMD);
             this.CommandManager.RemoveHandler(SendChat);
             CommandManager.RemoveHandler(ClrTemp);
+            this.PluginInterface.UiBuilder.Draw -= DrawTest;
             ECommons.ECommonsMain.Dispose();
         }
 
@@ -198,7 +212,6 @@ namespace XCount
             else if (command == CountNoWarCMD)
             {
                 ChatGui.Print($"周围非战职玩家数量：{CountResults.CountNoWar}");
-                ChatGui.PrintChat(new XivChatEntry());
             }
             else if (command == SendChat)
             {
@@ -219,12 +232,43 @@ namespace XCount
         {
             ConfigWindow.Toggle();
         }
-
-        public async Task Reapeat()
+        // 从pp那偷的代码。
+        // ff人的事，怎么能叫偷呢！
+        private void DrawRingWorld(GameObject actor, float radius, int numSegments, float thicc, uint colour)
         {
-            await Task.Delay(Configuration.countAlertRepeat*1000);
-            Configuration.enableCountAlert = true;
-            Configuration.Save();
+            var seg = numSegments / 2;
+            for (var i = 0; i <= numSegments; i++)
+            {
+                GameGui.WorldToScreen(new Vector3(
+                                          actor.Position.X  + (radius * (float)Math.Sin((Math.PI / seg) * i)),
+                                          actor.Position.Y,
+                                          actor.Position.Z  + (radius * (float)Math.Cos((Math.PI / seg) * i))
+                                      ),
+                                      out Vector2 pos);
+                ImGui.GetWindowDrawList().PathLineTo(new Vector2(pos.X, pos.Y));
+            }
+            ImGui.GetWindowDrawList().PathStroke(colour, ImDrawFlags.None, thicc);
+        }
+
+        private void DrawTest()
+        {
+            if (CountResults.DrawAdvCharacters.Count == 0||!Configuration.enableAdventurerDraw)
+            {
+                return;
+            }
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
+            ImGuiHelpers.ForceNextWindowMainViewport();
+            ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
+            ImGui.Begin("Canvas",
+                        ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoTitleBar |
+                        ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+            ImGui.SetWindowSize(ImGui.GetIO().DisplaySize);
+            foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
+            {
+                DrawRingWorld(advPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+            }
+            ImGui.End();
+            ImGui.PopStyleVar();
         }
     }
 }

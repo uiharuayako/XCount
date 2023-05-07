@@ -2,6 +2,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace XCount
 {
@@ -10,6 +11,7 @@ namespace XCount
         public IEnumerable<PlayerCharacter> playerCharacters;
         public IEnumerable<PlayerCharacter> travelPlayers;
         public IEnumerable<PlayerCharacter> unDowPlayers;
+        public IEnumerable<PlayerCharacter> advPlayers;
         public Dictionary<string, PlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
 
@@ -108,7 +110,41 @@ namespace XCount
                     // 判断是否重复开启
                     if (plugin.Configuration.countAlertRepeat > 0)
                     {
-                        plugin.Reapeat().Start();
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(plugin.Configuration.countAlertRepeat * 1000);
+                            plugin.Configuration.enableCountAlert = true;
+                            plugin.Configuration.Save();
+                        });
+                    }
+                }
+            }
+
+            if (plugin.Configuration.enableAdventurerAlert || plugin.Configuration.enableAdventurerDraw)
+            {
+                // 查找冒险者
+                advPlayers = playerCharacters.Where(pc => pc.ClassJob.GameData.Abbreviation.Equals("ADV"));
+                // 如果开了绘制
+                if (plugin.Configuration.enableAdventurerDraw)
+                {
+                    CountResults.DrawAdvCharacters = advPlayers.ToList();
+                }
+
+                // 如果开了警报，而且有这样的玩家
+                if (plugin.Configuration.enableAdventurerAlert && advPlayers.Count() != 0)
+                {
+                    plugin.chat.SendMessage(plugin.Configuration.advAlertStr);
+                    plugin.Configuration.enableAdventurerAlert = false;
+                    plugin.Configuration.Save();
+                    // 判断是否重复开启
+                    if (plugin.Configuration.advAlertRepeat > 0)
+                    {
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(plugin.Configuration.advAlertRepeat * 1000);
+                            plugin.Configuration.enableAdventurerAlert = true;
+                            plugin.Configuration.Save();
+                        });
                     }
                 }
             }

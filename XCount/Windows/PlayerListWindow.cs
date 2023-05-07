@@ -81,7 +81,7 @@ namespace XCount.Windows
                     if (displayAll)
                     {
                         ImGui.Text($"所有玩家（共{watcher.playerCharacters.Count()}）");
-                        ImGui.Columns(8, "All Players");
+                        ImGui.Columns(11, "All Players");
                         ImGui.Text("昵称");
                         ImGui.NextColumn();
                         ImGui.Text("部队");
@@ -95,6 +95,12 @@ namespace XCount.Windows
                         ImGui.Text("目标");
                         ImGui.NextColumn();
                         ImGui.Text("距离");
+                        ImGui.NextColumn();
+                        ImGui.Text("X");
+                        ImGui.NextColumn();
+                        ImGui.Text("Y");
+                        ImGui.NextColumn();
+                        ImGui.Text("Z");
                         ImGui.NextColumn();
                         ImGui.Text("ID");
                         ImGui.NextColumn();
@@ -131,7 +137,7 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                             ImGui.Text(player.Level.ToString());
                             ImGui.NextColumn();
-                            ImGui.TextColored(color, player.ClassJob.GameData.Name);
+                            ImGui.TextColored(color,$"{player.ClassJob.GameData.Abbreviation}:{player.ClassJob.GameData.Name}" );
                             ImGui.NextColumn();
                             string targetName = "无";
                             if (player.TargetObject != null)
@@ -142,6 +148,12 @@ namespace XCount.Windows
                             ImGui.Text(targetName);
                             ImGui.NextColumn();
                             ImGui.Text(StaticUtil.DistanceToPlayer(player).ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text( Math.Round(player.Position.X,3).ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(Math.Round(player.Position.Y, 3).ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(Math.Round(player.Position.Z, 3).ToString());
                             ImGui.NextColumn();
                             ImGui.Text(player.ObjectId.ToString());
                             ImGui.NextColumn();

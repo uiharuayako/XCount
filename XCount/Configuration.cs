@@ -25,7 +25,12 @@ namespace XCount
         public bool enableCountAlert { get; set; } = false;
         public int countAlertRepeat { get; set; } = 0;
         public int alertCount { get; set; } = 200;
-
+        // 冒险者警报
+        public bool enableAdventurerAlert { get; set; } = true;
+        public bool enableAdventurerDraw { get; set; } = true;
+        // 警报内容
+        public string advAlertStr { get; set; } = "/e 兄弟们有TMD冒险者在附近<se.1>!!!";
+        public int advAlertRepeat { get; set; } = 0;
         // 发送聊天
         public string chatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
 

@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Text;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 
 namespace XCount
 {
     public class CountResults
     {
+        // 画画用的
+        public static List<PlayerCharacter> DrawAdvCharacters { get; set; }
         // 指示监听器是否开启
         public static bool isUpdate { get; set; }
         public static int CountAll { get; set; }
@@ -22,6 +25,7 @@ namespace XCount
             TravelPlayer = 0;
             UnionPlayer = 0;
             isUpdate = false;
+            DrawAdvCharacters = new List<PlayerCharacter>();
             resultListStr = new StringBuilder("");
         }
         public static string[] CountStrings = { "<all>", "<nowar>", "<war>", "<foreign>", "<union>" };
