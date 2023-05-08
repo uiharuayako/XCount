@@ -39,6 +39,15 @@ public class ConfigWindow : Window, IDisposable
             plugin.PlayerListWindow.IsOpen = isDisplayList;
         }
 
+        var enableDrawInv=Configuration.enableDrawInv;
+        if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
+        {
+            Configuration.enableDrawInv = enableDrawInv;
+            Configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("当玩家在过场动画/切换区域加载时/其他情况下，\n其模型会不可见，勾选此项会把这样的玩家画出来");
+
         var isEnable = Configuration.EnablePlugin;
         if (ImGui.Checkbox("开启计数", ref isEnable))
         {
@@ -98,7 +107,13 @@ public class ConfigWindow : Window, IDisposable
                 Configuration.Save();
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("当周围出现职业为“冒险者”的玩家时，会触发警报\n该玩家有一定概率为隐身的GM");
+                ImGui.SetTooltip("当周围出现职业为“冒险者”的玩家时，会触发警报\n该玩家有一定概率为隐身的GM\n详见插件主页的介绍");
+            var advAlertStr =Configuration.advAlertStr;
+            if (ImGui.InputText("冒险者警报内容", ref advAlertStr, 500))
+            {
+                Configuration.advAlertStr = advAlertStr;
+                Configuration.Save();
+            }
             var advAlertRepeat = Configuration.advAlertRepeat;
             if (ImGui.InputInt("冒险者警报重复间隔（秒）", ref advAlertRepeat))
             {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ECommons.GameFunctions;
 
 namespace XCount
 {
@@ -12,6 +13,7 @@ namespace XCount
         public IEnumerable<PlayerCharacter> travelPlayers;
         public IEnumerable<PlayerCharacter> unDowPlayers;
         public IEnumerable<PlayerCharacter> advPlayers;
+        public IEnumerable<PlayerCharacter> invPlayers;
         public Dictionary<string, PlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
 
@@ -31,7 +33,7 @@ namespace XCount
         public void OnFrameworkUpdate(object _)
         {
             // 获取玩家列表
-            playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>();
+            playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>().Where(pc=>pc.ObjectId!= 3758096384);
             if (plugin.Configuration.enableDistanceSort)
             {
                 // 排序
@@ -57,7 +59,10 @@ namespace XCount
             CountResults.CountNoWar = unDowPlayers.Count();
             // 计算战职玩家数量
             CountResults.CountWar = CountResults.CountAll - unDowPlayers.Count();
-
+            // 计算不可见玩家数量
+            invPlayers=playerCharacters.Where(pc=>!pc.IsCharacterVisible());
+            CountResults.CountInv = invPlayers.Count();
+            CountResults.DrawInvCharacters = invPlayers.ToList();
             if (plugin.Configuration.ShowInDtr)
             {
                 string originStr = plugin.Configuration.dtrStr;
@@ -123,7 +128,7 @@ namespace XCount
             if (plugin.Configuration.enableAdventurerAlert || plugin.Configuration.enableAdventurerDraw)
             {
                 // 查找冒险者
-                advPlayers = playerCharacters.Where(pc => pc.ClassJob.GameData.Abbreviation.Equals("ADV"));
+                advPlayers = playerCharacters.Where(pc => pc.ClassJob.GameData.Abbreviation.ToString().Equals("ADV"));
                 // 如果开了绘制
                 if (plugin.Configuration.enableAdventurerDraw)
                 {

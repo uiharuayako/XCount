@@ -17,7 +17,8 @@ namespace XCount
 
         // 名单检测
         public bool enableNameSrarch { get; set; } = false;
-
+        // 是否画出不可见玩家
+        public bool enableDrawInv { get; set; } = true;
         // 开启警报（搜索id警报）
         public bool enableAlert { get; set; } = false;
         public string nameListStr { get; set; } = "";

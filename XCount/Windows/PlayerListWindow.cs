@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Colors;
+using ECommons.GameFunctions;
 
 namespace XCount.Windows
 {
@@ -19,10 +20,13 @@ namespace XCount.Windows
         private List<PlayerCharacter> searchNameList;
         private List<PlayerCharacter> searchFCList;
         private string searchName;
+
         private string searchFC;
+
         // 决定显示的元素
         private bool displayAll;
         private bool displayHistory;
+
         public PlayerListWindow(XCPlugin plugin) : base(
             "XCount玩家列表")
         {
@@ -33,8 +37,8 @@ namespace XCount.Windows
             searchFC = "";
             searchNameList = new List<PlayerCharacter>();
             searchFCList = new List<PlayerCharacter>();
-            displayAll=true;
-            displayHistory=false;
+            displayAll = true;
+            displayHistory = false;
         }
 
         public void Dispose() { }
@@ -56,16 +60,14 @@ namespace XCount.Windows
                 {
                     serverName = XCPlugin.ClientState.LocalPlayer.CurrentWorld.GameData.Name;
                 }
+
                 ImGui.Text($"当前服务器：{serverName}");
-                if (ImGui.InputText("搜索名称", ref searchName, 100))
-                {
-                }
+                if (ImGui.InputText("搜索名称", ref searchName, 100)) { }
+
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("如果人多，可能需要关闭以下的两个选项才能看见搜索结果");
-                if (ImGui.InputText("搜索部队", ref searchFC, 100))
-                {
+                if (ImGui.InputText("搜索部队", ref searchFC, 100)) { }
 
-                }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("如果人多，可能需要关闭以下的两个选项才能看见搜索结果");
                 if (ImGui.BeginChild("Player List", new Vector2(0f, -1f), true))
@@ -74,14 +76,15 @@ namespace XCount.Windows
                     ImGui.SameLine();
                     ImGui.Checkbox("显示累计统计", ref displayHistory);
                     ImGui.SameLine();
-                    if(ImGui.Button("清空累计统计"))
+                    if (ImGui.Button("清空累计统计"))
                     {
                         watcher.clearTemp();
                     }
+
                     if (displayAll)
                     {
                         ImGui.Text($"所有玩家（共{watcher.playerCharacters.Count()}）");
-                        ImGui.Columns(11, "All Players");
+                        ImGui.Columns(12, "All Players");
                         ImGui.Text("昵称");
                         ImGui.NextColumn();
                         ImGui.Text("部队");
@@ -104,6 +107,8 @@ namespace XCount.Windows
                         ImGui.NextColumn();
                         ImGui.Text("ID");
                         ImGui.NextColumn();
+                        ImGui.Text("可见性");
+                        ImGui.NextColumn();
                         foreach (var player in watcher.playerCharacters)
                         {
                             Vector4 color = ImGuiColors.DalamudGrey;
@@ -123,6 +128,7 @@ namespace XCount.Windows
                                     color = ImGuiColors.HealerGreen;
                                     break;
                             }
+
                             ImGui.TextColored(color, player.Name.TextValue);
                             ImGui.NextColumn();
                             string fcTag = "未知部队";
@@ -131,13 +137,15 @@ namespace XCount.Windows
                                 fcTag = player.CompanyTag.TextValue;
                             }
 
-                            ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
+                            ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold,
+                                              fcTag);
                             ImGui.NextColumn();
                             ImGui.Text(player.HomeWorld.GameData.Name);
                             ImGui.NextColumn();
                             ImGui.Text(player.Level.ToString());
                             ImGui.NextColumn();
-                            ImGui.TextColored(color,$"{player.ClassJob.GameData.Abbreviation}:{player.ClassJob.GameData.Name}" );
+                            ImGui.TextColored(
+                                color, $"{player.ClassJob.GameData.Abbreviation}:{player.ClassJob.GameData.Name}");
                             ImGui.NextColumn();
                             string targetName = "无";
                             if (player.TargetObject != null)
@@ -149,7 +157,7 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                             ImGui.Text(StaticUtil.DistanceToPlayer(player).ToString());
                             ImGui.NextColumn();
-                            ImGui.Text( Math.Round(player.Position.X,3).ToString());
+                            ImGui.Text(Math.Round(player.Position.X, 3).ToString());
                             ImGui.NextColumn();
                             ImGui.Text(Math.Round(player.Position.Y, 3).ToString());
                             ImGui.NextColumn();
@@ -157,10 +165,15 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                             ImGui.Text(player.ObjectId.ToString());
                             ImGui.NextColumn();
+                            bool visible = player.IsCharacterVisible();
+                            ImGui.TextColored(visible ? ImGuiColors.HealerGreen : ImGuiColors.DPSRed,
+                                              visible ? "是" : "否");
+                            ImGui.NextColumn();
                         }
-                        ImGui.Columns(1);
 
+                        ImGui.Columns(1);
                     }
+
                     if (displayHistory)
                     {
                         ImGui.Text($"所有玩家（累计统计）（共{watcher.tempPlayersDict.Count}）");
@@ -187,7 +200,7 @@ namespace XCount.Windows
                         {
                             ImGui.TextColored(ImGuiColors.DalamudViolet, playerDict.Key);
                             ImGui.NextColumn();
-                            var player=playerDict.Value;
+                            var player = playerDict.Value;
                             Vector4 color = ImGuiColors.DalamudGrey;
                             switch (player.ClassJob.GameData.Role)
                             {
@@ -205,6 +218,7 @@ namespace XCount.Windows
                                     color = ImGuiColors.HealerGreen;
                                     break;
                             }
+
                             ImGui.TextColored(color, player.Name.TextValue);
                             ImGui.NextColumn();
                             string fcTag = "未知部队";
@@ -213,7 +227,8 @@ namespace XCount.Windows
                                 fcTag = player.CompanyTag.TextValue;
                             }
 
-                            ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
+                            ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold,
+                                              fcTag);
                             ImGui.NextColumn();
                             ImGui.Text(player.HomeWorld.GameData.Name);
                             ImGui.NextColumn();
@@ -234,11 +249,14 @@ namespace XCount.Windows
                             ImGui.Text(player.ObjectId.ToString());
                             ImGui.NextColumn();
                         }
+
                         ImGui.Columns(1);
                     }
+
                     if (!searchName.Equals(""))
                     {
-                        searchNameList = watcher.playerCharacters.Where(pc => pc.Name.TextValue.Contains(searchName)).ToList();
+                        searchNameList = watcher.playerCharacters.Where(pc => pc.Name.TextValue.Contains(searchName))
+                                                .ToList();
                         if (ImGui.CollapsingHeader($"名称搜索结果（共{searchNameList.Count}）"))
                         {
                             ImGui.BeginChild("Name Players List");
@@ -278,6 +296,7 @@ namespace XCount.Windows
                                         color = ImGuiColors.HealerGreen;
                                         break;
                                 }
+
                                 ImGui.TextColored(color, player.Name.TextValue);
                                 ImGui.NextColumn();
                                 string fcTag = "未知部队";
@@ -286,7 +305,8 @@ namespace XCount.Windows
                                     fcTag = player.CompanyTag.TextValue;
                                 }
 
-                                ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
+                                ImGui.TextColored(
+                                    fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
                                 ImGui.NextColumn();
                                 ImGui.Text(player.HomeWorld.GameData.Name);
                                 ImGui.NextColumn();
@@ -307,14 +327,16 @@ namespace XCount.Windows
                                 ImGui.Text(player.ObjectId.ToString());
                                 ImGui.NextColumn();
                             }
+
                             ImGui.Columns(1);
                             ImGui.EndChild();
                         }
-
                     }
+
                     if (!searchFC.Equals(""))
                     {
-                        searchFCList = watcher.playerCharacters.Where(pc => pc.CompanyTag.TextValue.Contains(searchFC)).ToList();
+                        searchFCList = watcher.playerCharacters.Where(pc => pc.CompanyTag.TextValue.Contains(searchFC))
+                                              .ToList();
                         if (ImGui.CollapsingHeader($"部队搜索结果（共{searchFCList.Count}）"))
                         {
                             ImGui.Columns(8, "FC Players");
@@ -353,6 +375,7 @@ namespace XCount.Windows
                                         color = ImGuiColors.HealerGreen;
                                         break;
                                 }
+
                                 ImGui.TextColored(color, player.Name.TextValue);
                                 ImGui.NextColumn();
                                 string fcTag = "未知部队";
@@ -361,7 +384,8 @@ namespace XCount.Windows
                                     fcTag = player.CompanyTag.TextValue;
                                 }
 
-                                ImGui.TextColored(fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
+                                ImGui.TextColored(
+                                    fcTag.Equals("未知部队") ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedGold, fcTag);
                                 ImGui.NextColumn();
                                 ImGui.Text(player.HomeWorld.GameData.Name);
                                 ImGui.NextColumn();
@@ -382,10 +406,11 @@ namespace XCount.Windows
                                 ImGui.Text(player.ObjectId.ToString());
                                 ImGui.NextColumn();
                             }
+
                             ImGui.Columns(1);
                         }
-
                     }
+
                     ImGui.EndChild();
                 }
             }

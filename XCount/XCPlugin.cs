@@ -252,10 +252,6 @@ namespace XCount
 
         private void DrawTest()
         {
-            if (CountResults.DrawAdvCharacters.Count == 0||!Configuration.enableAdventurerDraw)
-            {
-                return;
-            }
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
@@ -263,9 +259,19 @@ namespace XCount
                         ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoTitleBar |
                         ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
             ImGui.SetWindowSize(ImGui.GetIO().DisplaySize);
-            foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
+            if (CountResults.DrawAdvCharacters.Count != 0 && Configuration.enableAdventurerDraw)
             {
-                DrawRingWorld(advPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+                foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
+                {
+                    DrawRingWorld(advPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+                }
+            }
+            if (Configuration.enableDrawInv)
+            {
+                foreach (PlayerCharacter invPlayer in CountResults.DrawInvCharacters)
+                {
+                    DrawRingWorld(invPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+                }
             }
             ImGui.End();
             ImGui.PopStyleVar();
