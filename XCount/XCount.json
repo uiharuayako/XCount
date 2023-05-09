@@ -4,8 +4,8 @@
     "Punchline": "计算你周围物体的数量",
     "Description": "/xc 显示gui",
     "InternalName": "XCount",
-    "AssemblyVersion": "0.1.0.6",
-    "DalamudApiLevel": 7,
+    "AssemblyVersion": "0.1.0.8",
+    "DalamudApiLevel": 8,
     "IconUrl": "https://raw.githubusercontent.com/uiharuayako/XCount/master/Data/XC.png",
     "ApplicableVersion": "any",
     "Tags": [

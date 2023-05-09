@@ -266,7 +266,7 @@ namespace XCount
                     DrawRingWorld(advPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
                 }
             }
-            if (Configuration.enableDrawInv)
+            if (Configuration.enableDrawInvis)
             {
                 foreach (PlayerCharacter invPlayer in CountResults.DrawInvCharacters)
                 {

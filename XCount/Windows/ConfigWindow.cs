@@ -39,10 +39,10 @@ public class ConfigWindow : Window, IDisposable
             plugin.PlayerListWindow.IsOpen = isDisplayList;
         }
 
-        var enableDrawInv=Configuration.enableDrawInv;
+        var enableDrawInv=Configuration.enableDrawInvis;
         if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
         {
-            Configuration.enableDrawInv = enableDrawInv;
+            Configuration.enableDrawInvis = enableDrawInv;
             Configuration.Save();
         }
         if (ImGui.IsItemHovered())
