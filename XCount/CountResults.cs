@@ -9,6 +9,7 @@ namespace XCount
         // 画画用的
         public static List<PlayerCharacter> DrawAdvCharacters { get; set; }
         public static List<PlayerCharacter> DrawInvCharacters { get; set; }
+        public static List<PlayerCharacter> DrawExcelCharacters { get; set; }
         // 指示监听器是否开启
         public static bool isUpdate { get; set; }
         public static int CountAll { get; set; }
@@ -17,6 +18,7 @@ namespace XCount
         public static int TravelPlayer { get; set; }
         public static int UnionPlayer { get; set; }
         public static int CountInv { get; set; }
+        public static int CountExcel { get; set; }
         public static StringBuilder resultListStr { get; set; }
         // 静态构造函数
         static CountResults()
@@ -27,18 +29,20 @@ namespace XCount
             TravelPlayer = 0;
             UnionPlayer = 0;
             CountInv = 0;
+            CountExcel = 0;
             isUpdate = false;
             DrawAdvCharacters = new List<PlayerCharacter>();
             DrawInvCharacters = new List<PlayerCharacter>();
+            DrawExcelCharacters= new List<PlayerCharacter>();
             resultListStr = new StringBuilder("");
         }
-        public static string[] CountStrings = { "<all>", "<nowar>", "<war>", "<foreign>","<inv>", "<union>" };
+        public static string[] CountStrings = { "<all>", "<nowar>", "<war>", "<foreign>","<inv>","<excel>", "<union>" };
 
         public static string[] GetResultStrings()
         {
             string[] result =
             {
-                CountAll.ToString(), CountNoWar.ToString(), CountWar.ToString(), TravelPlayer.ToString(),CountInv.ToString(),
+                CountAll.ToString(), CountNoWar.ToString(), CountWar.ToString(), TravelPlayer.ToString(),CountInv.ToString(),CountExcel.ToString(),
                 UnionPlayer.ToString()
             };
             return result;

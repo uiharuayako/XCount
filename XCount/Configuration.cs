@@ -17,21 +17,31 @@ namespace XCount
 
         // 名单检测
         public bool enableNameSrarch { get; set; } = false;
+
         // 是否画出不可见玩家
         public bool enableDrawInvis { get; set; } = false;
+
         // 开启警报（搜索id警报）
         public bool enableAlert { get; set; } = false;
+
         public string nameListStr { get; set; } = "";
+
         // 开启警报（人数警报）
         public bool enableCountAlert { get; set; } = false;
         public int countAlertRepeat { get; set; } = 0;
+
         public int alertCount { get; set; } = 200;
+
         // 冒险者警报
         public bool enableAdventurerAlert { get; set; } = true;
+
         public bool enableAdventurerDraw { get; set; } = true;
+
         // 警报内容
         public string advAlertStr { get; set; } = "/e 兄弟们有TMD冒险者在附近<se.1>!!!";
+
         public int advAlertRepeat { get; set; } = 0;
+
         // 发送聊天
         public string chatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
 
@@ -42,6 +52,18 @@ namespace XCount
 
         // 开启按距离排序
         public bool enableDistanceSort { get; set; } = true;
+
+        public bool EnableOnlineList=false;
+        // 腾讯文档参数
+        public string TXDocUrl { get; set; } = "https://docs.qq.com/sheet/xxx";
+        public string TXLocalPadId = "300000000$xxxxx";
+        public string TXCookie = "你的cookie";
+        public bool DrawExcel=false;
+        public string SheetName = "表格名";
+        public string ExcelPath = "";
+        public int NameCol = 1;
+        public int ServerCol = 2;
+        public bool AutoUpdateTXDoc = false;
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]

@@ -2,6 +2,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using ECommons.GameFunctions;
 
@@ -10,15 +11,21 @@ namespace XCount
     public class PCWatcher : IDisposable
     {
         public IEnumerable<PlayerCharacter> playerCharacters;
-        public IEnumerable<PlayerCharacter> travelPlayers;
-        public IEnumerable<PlayerCharacter> unDowPlayers;
-        public IEnumerable<PlayerCharacter> advPlayers;
-        public IEnumerable<PlayerCharacter> invPlayers;
+        public List<PlayerCharacter> travelPlayers;
+        public List<PlayerCharacter> unDowPlayers;
+        public List<PlayerCharacter> advPlayers;
+        public List<PlayerCharacter> invPlayers;
+        public List<PlayerCharacter> excelPlayers;
         public Dictionary<string, PlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
 
         public PCWatcher(XCPlugin plugin)
         {
+            travelPlayers=new List<PlayerCharacter>();
+            unDowPlayers=new List<PlayerCharacter>();
+            advPlayers=new List<PlayerCharacter>();
+            invPlayers=new List<PlayerCharacter>();
+            excelPlayers=new List<PlayerCharacter>();
             CountResults.isUpdate = false;
             tempPlayersDict = new Dictionary<string, PlayerCharacter>();
             this.plugin = plugin;
@@ -34,56 +41,44 @@ namespace XCount
         {
             // 获取玩家列表
             playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>().Where(pc=>pc.ObjectId!= 3758096384);
+            travelPlayers = new List<PlayerCharacter>();
+            unDowPlayers = new List<PlayerCharacter>();
+            advPlayers = new List<PlayerCharacter>();
+            invPlayers = new List<PlayerCharacter>();
+            excelPlayers = new List<PlayerCharacter>();
             if (plugin.Configuration.enableDistanceSort)
             {
                 // 排序
                 playerCharacters = playerCharacters.OrderBy(StaticUtil.DistanceToPlayer);
             }
 
-            if (plugin.Configuration.tempStat && CountResults.UnionPlayer < 9999)
+            foreach (PlayerCharacter character in playerCharacters)
             {
-                // 如果合并搜索开启，则执行：
-                foreach (PlayerCharacter character in playerCharacters)
+                // 合并搜索部分
+                if (plugin.Configuration.tempStat && CountResults.UnionPlayer < 9999)
                 {
+                    // 如果合并搜索开启，则执行：
                     tempPlayersDict[$"{character.Name.TextValue}@{character.HomeWorld.GameData.Name}"] = character;
                 }
-            }
-
-            CountResults.UnionPlayer = tempPlayersDict.Count;
-            CountResults.CountAll = playerCharacters.Count();
-            // 不在本服的玩家
-            travelPlayers = playerCharacters.Where(pc => pc.CurrentWorld.GameData.Name != pc.HomeWorld.GameData.Name);
-            CountResults.TravelPlayer = travelPlayers.Count();
-            // 非战职玩家
-            unDowPlayers = playerCharacters.Where(pc => pc.ClassJob.GameData.DohDolJobIndex != -1);
-            CountResults.CountNoWar = unDowPlayers.Count();
-            // 计算战职玩家数量
-            CountResults.CountWar = CountResults.CountAll - unDowPlayers.Count();
-            // 计算不可见玩家数量
-            invPlayers=playerCharacters.Where(pc=>!pc.IsCharacterVisible());
-            CountResults.CountInv = invPlayers.Count();
-            CountResults.DrawInvCharacters = invPlayers.ToList();
-            if (plugin.Configuration.ShowInDtr)
-            {
-                string originStr = plugin.Configuration.dtrStr;
-                // 如果开启合并统计
-                if (plugin.Configuration.tempStat)
+                // 跨服玩家
+                if (character.CurrentWorld.GameData.Name != character.HomeWorld.GameData.Name)
                 {
-                    originStr += plugin.Configuration.unionStr;
+                    travelPlayers.Add(character);
                 }
-
-                // 设置状态栏
-                plugin.dtrEntry.Text = CountResults.ResultString(originStr);
-            }
-
-            // 搜索指定玩家
-            if (plugin.Configuration.enableNameSrarch)
-            {
-                CountResults.resultListStr.Clear();
-                // 遍历玩家列表
-                foreach (PlayerCharacter playerCharacter in playerCharacters)
+                // 非战职玩家
+                if (character.ClassJob.GameData.DohDolJobIndex != -1)
                 {
-                    string name = playerCharacter.Name.TextValue;
+                    unDowPlayers.Add(character);
+                }
+                // 不可见玩家
+                if (!character.IsCharacterVisible())
+                {
+                    invPlayers.Add(character);
+                }
+                // 基于姓名搜索
+                if (plugin.Configuration.enableNameSrarch)
+                {
+                    string name = character.Name.TextValue;
                     if (plugin.Configuration.nameListStr.Contains(name))
                     {
                         if (plugin.Configuration.enableAlert)
@@ -96,6 +91,42 @@ namespace XCount
                         CountResults.resultListStr.AppendLine(name);
                     }
                 }
+                // 谁是冒险者
+                if (character.ClassJob.GameData.Abbreviation.ToString().Equals("ADV"))
+                {
+                    advPlayers.Add(character);
+                }
+                // 找到在线列表中的玩家
+                if (plugin.Configuration.EnableOnlineList)
+                {
+                    if (ExcelProcess.ExcelList.Contains(new SimplePlayer(character.Name.ToString(), character.HomeWorld.GameData.Name.ToString())))
+                    {
+                        excelPlayers.Add(character);
+                    }
+                }
+            }
+
+
+            CountResults.UnionPlayer = tempPlayersDict.Count;
+            CountResults.CountAll = playerCharacters.Count();
+            CountResults.TravelPlayer = travelPlayers.Count();
+            CountResults.CountNoWar = unDowPlayers.Count();
+            CountResults.CountWar = CountResults.CountAll - unDowPlayers.Count();
+            CountResults.CountInv = invPlayers.Count();
+            CountResults.DrawInvCharacters = invPlayers;
+            CountResults.CountExcel=excelPlayers.Count();
+            CountResults.DrawExcelCharacters = excelPlayers;
+            if (plugin.Configuration.ShowInDtr)
+            {
+                string originStr = plugin.Configuration.dtrStr;
+                // 如果开启合并统计
+                if (plugin.Configuration.tempStat)
+                {
+                    originStr += plugin.Configuration.unionStr;
+                }
+
+                // 设置状态栏
+                plugin.dtrEntry.Text = CountResults.ResultString(originStr);
             }
 
             // 判断人数是否超过阈值
@@ -127,12 +158,10 @@ namespace XCount
 
             if (plugin.Configuration.enableAdventurerAlert || plugin.Configuration.enableAdventurerDraw)
             {
-                // 查找冒险者
-                advPlayers = playerCharacters.Where(pc => pc.ClassJob.GameData.Abbreviation.ToString().Equals("ADV"));
                 // 如果开了绘制
                 if (plugin.Configuration.enableAdventurerDraw)
                 {
-                    CountResults.DrawAdvCharacters = advPlayers.ToList();
+                    CountResults.DrawAdvCharacters=advPlayers;
                 }
 
                 // 如果开了警报，而且有这样的玩家

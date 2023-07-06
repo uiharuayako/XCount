@@ -15,17 +15,25 @@ using System.Numerics;
 using Dalamud.Game.Text;
 using XCount.Windows;
 using System.Threading.Tasks;
+using System.Timers;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using ImGuiNET;
 using Dalamud.Interface.Colors;
+using ECommons.GameFunctions;
+using Microsoft.Extensions.Configuration;
+using static Lumina.Data.Parsing.Layer.LayerCommon;
+using XIVPainter.Element3D;
 
 namespace XCount
 {
     public sealed class XCPlugin : IDalamudPlugin
     {
         public string Name => "XCount";
+
+        // 插件路径
+        public static string PluginPath="";
 
         // 命令列表
         private const string CommandName = "/xc";
@@ -76,9 +84,13 @@ namespace XCount
         [RequiredVersion("1.0")]
         public static ClientState ClientState { get; private set; } = null!;
 
-        public Chat chat { get; private set; } = null!;
+        public static XIVPainter.XIVPainter Painter;
 
-        
+        public Chat chat { get; private set; } = null!;
+        // 计时器，用于定时更新绘图信息
+        private Timer drawingTimer;
+
+
 
         // 插件初始化
         public XCPlugin(
@@ -91,9 +103,11 @@ namespace XCount
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
             ECommons.ECommonsMain.Init(pluginInterface, this);
+            Painter = XIVPainter.XIVPainter.Create(pluginInterface, "%NAME%");
             chat = new Chat();
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "XC.png");
+            PluginPath = PluginInterface.AssemblyLocation.DirectoryName;
             var image = this.PluginInterface.UiBuilder.LoadImage(imagePath);
             watcher = new PCWatcher(this);
             watcher.Enable();
@@ -148,7 +162,19 @@ namespace XCount
 
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
-            this.PluginInterface.UiBuilder.Draw += DrawTest;
+            if (Configuration.EnableOnlineList)
+            {
+                StaticUtil.IsFileExists(PluginPath, "TXList", "xlsx");
+                ExcelProcess.ReadPlayerInfoFromExcel(Configuration.ExcelPath,Configuration.SheetName,Configuration.NameCol,Configuration.ServerCol);
+                if (Configuration.AutoUpdateTXDoc)
+                {
+                    StaticUtil.DownLoadTXDoc(Configuration);
+                }
+            }
+            drawingTimer=new Timer(1000);
+            drawingTimer.Elapsed += drawPlayers;
+            drawingTimer.Start();
+
         }
 
         public void loadDtr()
@@ -164,8 +190,9 @@ namespace XCount
 
         public void Dispose()
         {
+            drawingTimer.Close();
             this.WindowSystem.RemoveAllWindows();
-
+            Painter.Dispose();
             ConfigWindow.Dispose();
             MainWindow.Dispose();
             PlayerListWindow.Dispose();
@@ -179,7 +206,6 @@ namespace XCount
             this.CommandManager.RemoveHandler(CountNoWarCMD);
             this.CommandManager.RemoveHandler(SendChat);
             CommandManager.RemoveHandler(ClrTemp);
-            this.PluginInterface.UiBuilder.Draw -= DrawTest;
             ECommons.ECommonsMain.Dispose();
         }
 
@@ -232,49 +258,33 @@ namespace XCount
         {
             ConfigWindow.Toggle();
         }
-        // 从pp那偷的代码。
-        // ff人的事，怎么能叫偷呢！
-        private void DrawRingWorld(GameObject actor, float radius, int numSegments, float thicc, uint colour)
-        {
-            var seg = numSegments / 2;
-            for (var i = 0; i <= numSegments; i++)
-            {
-                GameGui.WorldToScreen(new Vector3(
-                                          actor.Position.X  + (radius * (float)Math.Sin((Math.PI / seg) * i)),
-                                          actor.Position.Y,
-                                          actor.Position.Z  + (radius * (float)Math.Cos((Math.PI / seg) * i))
-                                      ),
-                                      out Vector2 pos);
-                ImGui.GetWindowDrawList().PathLineTo(new Vector2(pos.X, pos.Y));
-            }
-            ImGui.GetWindowDrawList().PathStroke(colour, ImDrawFlags.None, thicc);
-        }
 
-        private void DrawTest()
+        private void drawPlayers(object _,object __)
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
-            ImGuiHelpers.ForceNextWindowMainViewport();
-            ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
-            ImGui.Begin("Canvas",
-                        ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoTitleBar |
-                        ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
-            ImGui.SetWindowSize(ImGui.GetIO().DisplaySize);
+            Painter.RemoveAll();
             if (CountResults.DrawAdvCharacters.Count != 0 && Configuration.enableAdventurerDraw)
             {
                 foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
                 {
-                    DrawRingWorld(advPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+                    Painter.AddDrawings(new Drawing3DCircularSectorO(advPlayer,0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 4));
                 }
             }
             if (Configuration.enableDrawInvis)
             {
                 foreach (PlayerCharacter invPlayer in CountResults.DrawInvCharacters)
                 {
-                    DrawRingWorld(invPlayer, 0.8f, 100, 10f, ImGui.GetColorU32(ImGuiColors.DPSRed));
+                    Painter.AddDrawings(new Drawing3DCircularSectorO(invPlayer, 0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 4));
                 }
             }
-            ImGui.End();
-            ImGui.PopStyleVar();
+
+            if (Configuration.DrawExcel)
+            {
+                foreach (PlayerCharacter excelPlayer in CountResults.DrawExcelCharacters)
+                {
+                    Painter.AddDrawings(new Drawing3DCircularSectorO(excelPlayer, 0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0f, 0f, 0.2f)), 4));
+
+                }
+            }
         }
     }
 }

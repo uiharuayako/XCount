@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Uiharu</Authors>
     <Company></Company>
-    <Version>0.1.0.8</Version>
+    <Version>0.1.0.9</Version>
     <Description>计算周围玩家数量</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/uiharuayako/XCount</PackageProjectUrl>
@@ -21,7 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\Data\XC.png">
+      <ProjectReference Include="..\XIVPainter\XIVPainter\XIVPainter.csproj" />
+      <Content Include="..\Data\XC.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
@@ -39,6 +40,7 @@
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.10" />
     <PackageReference Include="ECommons" Version="2.0.0.4" />
+    <PackageReference Include="EPPlus" Version="7.0.0-preview1" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>
