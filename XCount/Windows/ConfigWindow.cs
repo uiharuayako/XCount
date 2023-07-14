@@ -209,42 +209,42 @@ public class ConfigWindow : Window, IDisposable
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem("冒险者（GM）警报"))
+            if (ImGui.BeginTabItem("GM警报"))
             {
-                var enableAdventurerDraw = Configuration.enableAdventurerDraw;
-                if (ImGui.Checkbox("开启冒险者绘制", ref enableAdventurerDraw))
+                var enableGmDraw = Configuration.enableGMDraw;
+                if (ImGui.Checkbox("开启GM绘制", ref enableGmDraw))
                 {
-                    Configuration.enableAdventurerDraw = enableAdventurerDraw;
+                    Configuration.enableGMDraw = enableGmDraw;
                     Configuration.Save();
                 }
 
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("此设置独立于下面一条设置");
-                var enableAdventurerAlert = Configuration.enableAdventurerAlert;
-                if (ImGui.Checkbox("开启冒险者警报", ref enableAdventurerAlert))
+                var enableGmAlert = Configuration.enableGMAlert;
+                if (ImGui.Checkbox("开启GM警报", ref enableGmAlert))
                 {
-                    Configuration.enableAdventurerAlert = enableAdventurerAlert;
+                    Configuration.enableGMAlert = enableGmAlert;
                     Configuration.Save();
                 }
 
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("当周围出现职业为“冒险者”的玩家时，会触发警报\n该玩家有一定概率为隐身的GM\n详见插件主页的介绍");
-                var advAlertStr = Configuration.advAlertStr;
-                if (ImGui.InputText("冒险者警报内容", ref advAlertStr, 500))
+                    ImGui.SetTooltip("通过OnlineStatus判断GM");
+                var gmAlertStr = Configuration.gmAlertStr;
+                if (ImGui.InputText("GM警报内容", ref gmAlertStr, 500))
                 {
-                    Configuration.advAlertStr = advAlertStr;
+                    Configuration.gmAlertStr = gmAlertStr;
                     Configuration.Save();
                 }
 
-                var advAlertRepeat = Configuration.advAlertRepeat;
-                if (ImGui.InputInt("冒险者警报重复间隔（秒）", ref advAlertRepeat))
+                var gmAlertRepeat = Configuration.gmAlertRepeat;
+                if (ImGui.InputInt("GM警报重复间隔（秒）", ref gmAlertRepeat))
                 {
-                    Configuration.advAlertRepeat = advAlertRepeat;
+                    Configuration.gmAlertRepeat = gmAlertRepeat;
                     Configuration.Save();
                 }
 
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("当执行冒险者警报之后，会自动关闭冒险者警报，并在这\n一栏设置的秒数之后自动重新开启，设置0则手动开启。");
+                    ImGui.SetTooltip("当执行GM警报之后，会自动关闭GM警报，并在这\n一栏设置的秒数之后自动重新开启，设置0则手动开启。");
                 ImGui.EndTabItem();
             }
 
@@ -358,6 +358,7 @@ public class ConfigWindow : Window, IDisposable
                         StaticUtil.DownLoadTXDoc(Configuration);
                     }
                 }
+                ImGui.EndTabItem();
             }
 
             ImGui.EndTabBar();

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using ECommons.GameFunctions;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace XCount
 {
@@ -13,7 +14,7 @@ namespace XCount
         public IEnumerable<PlayerCharacter> playerCharacters;
         public List<PlayerCharacter> travelPlayers;
         public List<PlayerCharacter> unDowPlayers;
-        public List<PlayerCharacter> advPlayers;
+        public List<PlayerCharacter> GMsCharacters;
         public List<PlayerCharacter> invPlayers;
         public List<PlayerCharacter> excelPlayers;
         public Dictionary<string, PlayerCharacter> tempPlayersDict;
@@ -21,11 +22,11 @@ namespace XCount
 
         public PCWatcher(XCPlugin plugin)
         {
-            travelPlayers=new List<PlayerCharacter>();
-            unDowPlayers=new List<PlayerCharacter>();
-            advPlayers=new List<PlayerCharacter>();
-            invPlayers=new List<PlayerCharacter>();
-            excelPlayers=new List<PlayerCharacter>();
+            travelPlayers = new List<PlayerCharacter>();
+            unDowPlayers = new List<PlayerCharacter>();
+            GMsCharacters = new List<PlayerCharacter>();
+            invPlayers = new List<PlayerCharacter>();
+            excelPlayers = new List<PlayerCharacter>();
             CountResults.isUpdate = false;
             tempPlayersDict = new Dictionary<string, PlayerCharacter>();
             this.plugin = plugin;
@@ -39,11 +40,15 @@ namespace XCount
 
         public void OnFrameworkUpdate(object _)
         {
+            if (!XCPlugin.ClientState.IsLoggedIn) return;
+            if (XCPlugin.ClientState.LocalPlayer == null) return;
+            if (!XCPlugin.ClientState.LocalPlayer.IsCharacterVisible()) return;
+            if (XCPlugin.ClientState.IsPvP) return;
             // 获取玩家列表
-            playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>().Where(pc=>pc.ObjectId!= 3758096384);
+            playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>().Where(pc => pc.ObjectId != 3758096384);
             travelPlayers = new List<PlayerCharacter>();
             unDowPlayers = new List<PlayerCharacter>();
-            advPlayers = new List<PlayerCharacter>();
+            GMsCharacters = new List<PlayerCharacter>();
             invPlayers = new List<PlayerCharacter>();
             excelPlayers = new List<PlayerCharacter>();
             if (plugin.Configuration.enableDistanceSort)
@@ -60,21 +65,25 @@ namespace XCount
                     // 如果合并搜索开启，则执行：
                     tempPlayersDict[$"{character.Name.TextValue}@{character.HomeWorld.GameData.Name}"] = character;
                 }
+
                 // 跨服玩家
                 if (character.CurrentWorld.GameData.Name != character.HomeWorld.GameData.Name)
                 {
                     travelPlayers.Add(character);
                 }
+
                 // 非战职玩家
                 if (character.ClassJob.GameData.DohDolJobIndex != -1)
                 {
                     unDowPlayers.Add(character);
                 }
+
                 // 不可见玩家
                 if (!character.IsCharacterVisible())
                 {
                     invPlayers.Add(character);
                 }
+
                 // 基于姓名搜索
                 if (plugin.Configuration.enableNameSrarch)
                 {
@@ -91,15 +100,22 @@ namespace XCount
                         CountResults.resultListStr.AppendLine(name);
                     }
                 }
-                // 谁是冒险者
-                if (character.ClassJob.GameData.Abbreviation.ToString().Equals("ADV"))
+
+                // 谁是GM
+                unsafe
                 {
-                    advPlayers.Add(character);
+                    if (((Character*)(character.Address))->OnlineStatus <= 3 &&
+                        ((Character*)(character.Address))->OnlineStatus > 0)
+                    {
+                        GMsCharacters.Add(character);
+                    }
                 }
+
                 // 找到在线列表中的玩家
                 if (plugin.Configuration.EnableOnlineList)
                 {
-                    if (ExcelProcess.ExcelList.Contains(new SimplePlayer(character.Name.ToString(), character.HomeWorld.GameData.Name.ToString())))
+                    if (ExcelProcess.ExcelList.Contains(
+                            new SimplePlayer(character.Name.ToString(), character.HomeWorld.GameData.Name.ToString())))
                     {
                         excelPlayers.Add(character);
                     }
@@ -114,7 +130,7 @@ namespace XCount
             CountResults.CountWar = CountResults.CountAll - unDowPlayers.Count();
             CountResults.CountInv = invPlayers.Count();
             CountResults.DrawInvCharacters = invPlayers;
-            CountResults.CountExcel=excelPlayers.Count();
+            CountResults.CountExcel = excelPlayers.Count();
             CountResults.DrawExcelCharacters = excelPlayers;
             if (plugin.Configuration.ShowInDtr)
             {
@@ -156,27 +172,27 @@ namespace XCount
                 }
             }
 
-            if (plugin.Configuration.enableAdventurerAlert || plugin.Configuration.enableAdventurerDraw)
+            if (plugin.Configuration.enableGMAlert || plugin.Configuration.enableGMDraw)
             {
                 // 如果开了绘制
-                if (plugin.Configuration.enableAdventurerDraw)
+                if (plugin.Configuration.enableGMDraw)
                 {
-                    CountResults.DrawAdvCharacters=advPlayers;
+                    CountResults.DrawAdvCharacters = GMsCharacters;
                 }
 
                 // 如果开了警报，而且有这样的玩家
-                if (plugin.Configuration.enableAdventurerAlert && advPlayers.Count() != 0)
+                if (plugin.Configuration.enableGMAlert && GMsCharacters.Count() != 0)
                 {
-                    plugin.chat.SendMessage(plugin.Configuration.advAlertStr);
-                    plugin.Configuration.enableAdventurerAlert = false;
+                    plugin.chat.SendMessage(plugin.Configuration.gmAlertStr);
+                    plugin.Configuration.enableGMAlert = false;
                     plugin.Configuration.Save();
                     // 判断是否重复开启
-                    if (plugin.Configuration.advAlertRepeat > 0)
+                    if (plugin.Configuration.gmAlertRepeat > 0)
                     {
                         Task.Run(async () =>
                         {
-                            await Task.Delay(plugin.Configuration.advAlertRepeat * 1000);
-                            plugin.Configuration.enableAdventurerAlert = true;
+                            await Task.Delay(plugin.Configuration.gmAlertRepeat * 1000);
+                            plugin.Configuration.enableGMAlert = true;
                             plugin.Configuration.Save();
                         });
                     }
