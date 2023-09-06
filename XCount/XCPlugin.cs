@@ -262,7 +262,11 @@ namespace XCount
         private void drawPlayers(object _,object __)
         {
             // pvp时禁用绘图
-            if(ClientState.IsPvP) return;
+            if (ClientState.IsPvP)
+            {
+                Painter.RemoveAll();
+                return;
+            }
             Painter.RemoveAll();
             if (CountResults.DrawAdvCharacters.Count != 0 && Configuration.enableGMDraw)
             {
