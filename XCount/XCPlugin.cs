@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
@@ -11,6 +12,7 @@ using Dalamud.Plugin;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Game.Text;
 using XCount.Windows;
@@ -33,7 +35,7 @@ namespace XCount
         public string Name => "XCount";
 
         // 插件路径
-        public static string PluginPath="";
+        public static string PluginPath = "";
 
         // 命令列表
         private const string CommandName = "/xc";
@@ -60,6 +62,8 @@ namespace XCount
 
         public DtrBarEntry dtrEntry { get; init; }
 
+        private static List<Drawing3DCircularSectorO> Drawings = new();
+
         // Service
         [PluginService]
         [RequiredVersion("1.0")]
@@ -71,7 +75,8 @@ namespace XCount
 
         [PluginService]
         [RequiredVersion("1.0")]
-        public static ChatGui ChatGui { get; private set; } = null!; 
+        public static ChatGui ChatGui { get; private set; } = null!;
+
         [PluginService]
         [RequiredVersion("1.0")]
         public static GameGui GameGui { get; private set; } = null!;
@@ -87,9 +92,9 @@ namespace XCount
         public static XIVPainter.XIVPainter Painter;
 
         public Chat chat { get; private set; } = null!;
+
         // 计时器，用于定时更新绘图信息
         private Timer drawingTimer;
-
 
 
         // 插件初始化
@@ -104,6 +109,7 @@ namespace XCount
             this.Configuration.Initialize(this.PluginInterface);
             ECommons.ECommonsMain.Init(pluginInterface, this);
             Painter = XIVPainter.XIVPainter.Create(pluginInterface, "%NAME%");
+            Painter.Enable = Configuration.EnablePainter;
             chat = new Chat();
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "XC.png");
@@ -165,16 +171,17 @@ namespace XCount
             if (Configuration.EnableOnlineList)
             {
                 StaticUtil.IsFileExists(PluginPath, "TXList", "xlsx");
-                ExcelProcess.ReadPlayerInfoFromExcel(Configuration.ExcelPath,Configuration.SheetName,Configuration.NameCol,Configuration.ServerCol);
+                ExcelProcess.ReadPlayerInfoFromExcel(Configuration.ExcelPath, Configuration.SheetName,
+                                                     Configuration.NameCol, Configuration.ServerCol);
                 if (Configuration.AutoUpdateTXDoc)
                 {
                     StaticUtil.DownLoadTXDoc(Configuration);
                 }
             }
-            drawingTimer=new Timer(1000);
+
+            drawingTimer = new Timer(1000);
             drawingTimer.Elapsed += drawPlayers;
             drawingTimer.Start();
-
         }
 
         public void loadDtr()
@@ -259,27 +266,32 @@ namespace XCount
             ConfigWindow.Toggle();
         }
 
-        private void drawPlayers(object _,object __)
+        private void drawPlayers(object _, object __)
         {
-            // pvp时禁用绘图
-            if (ClientState.IsPvP)
+            if(!Configuration.EnablePainter) return;
+            if (Drawings.Any())
             {
-                Painter.RemoveAll();
-                return;
+                Painter.RemoveDrawings(Drawings.ToArray());
+                Drawings.Clear();
             }
-            Painter.RemoveAll();
+
             if (CountResults.DrawAdvCharacters.Count != 0 && Configuration.enableGMDraw)
             {
                 foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
                 {
-                    Painter.AddDrawings(new Drawing3DCircularSectorO(advPlayer,0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 4));
+                    Drawings.Add(new Drawing3DCircularSectorO(advPlayer, 0.125f,
+                                                              ImGui.ColorConvertFloat4ToU32(
+                                                                  new Vector4(1f, 0.5f, 0.4f, 0.15f)), 1));
                 }
             }
+
             if (Configuration.enableDrawInvis)
             {
                 foreach (PlayerCharacter invPlayer in CountResults.DrawInvCharacters)
                 {
-                    Painter.AddDrawings(new Drawing3DCircularSectorO(invPlayer, 0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 4));
+                    Drawings.Add(new Drawing3DCircularSectorO(invPlayer, 0.125f,
+                                                              ImGui.ColorConvertFloat4ToU32(
+                                                                  new Vector4(1f, 0.5f, 0.4f, 0.15f)), 1));
                 }
             }
 
@@ -287,10 +299,12 @@ namespace XCount
             {
                 foreach (PlayerCharacter excelPlayer in CountResults.DrawExcelCharacters)
                 {
-                    Painter.AddDrawings(new Drawing3DCircularSectorO(excelPlayer, 0.125f, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0f, 0f, 0.2f)), 4));
-
+                    Drawings.Add(new Drawing3DCircularSectorO(excelPlayer, 0.125f,
+                                                                     ImGui.ColorConvertFloat4ToU32(
+                                                                         new Vector4(1f, 0f, 0f, 0.2f)), 1));
                 }
             }
+            if(Drawings.Any()) Painter.AddDrawings(Drawings.ToArray());
         }
     }
 }

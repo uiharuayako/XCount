@@ -65,6 +65,9 @@ namespace XCount
         public int ServerCol = 2;
         public bool AutoUpdateTXDoc = false;
 
+        // 绘制功能
+        public bool EnablePainter { get; set; } = false;
+
         // the below exist just to make saving less cumbersome
         [NonSerialized]
         private DalamudPluginInterface? PluginInterface;

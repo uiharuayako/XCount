@@ -49,6 +49,14 @@ public class ConfigWindow : Window, IDisposable
                     plugin.PlayerListWindow.IsOpen = isDisplayList;
                 }
 
+                var enablePainter=plugin.Configuration.EnablePainter;
+                if (ImGui.Checkbox("启用绘制功能", ref enablePainter))
+                {
+                    plugin.Configuration.EnablePainter = enablePainter;
+                    XCPlugin.Painter.Enable = enablePainter;
+                    plugin.Configuration.Save();
+                }
+
                 var enableDrawInv = Configuration.enableDrawInvis;
                 if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
                 {

@@ -43,7 +43,6 @@ namespace XCount
             if (!XCPlugin.ClientState.IsLoggedIn) return;
             if (XCPlugin.ClientState.LocalPlayer == null) return;
             if (!XCPlugin.ClientState.LocalPlayer.IsCharacterVisible()) return;
-            if (XCPlugin.ClientState.IsPvP) return;
             // 获取玩家列表
             playerCharacters = XCPlugin.ObjectTable.OfType<PlayerCharacter>().Where(pc => pc.ObjectId != 3758096384);
             travelPlayers = new List<PlayerCharacter>();
