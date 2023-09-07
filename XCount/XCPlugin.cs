@@ -23,6 +23,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using ImGuiNET;
 using Dalamud.Interface.Colors;
+using ECommons;
 using ECommons.GameFunctions;
 using Microsoft.Extensions.Configuration;
 using static Lumina.Data.Parsing.Layer.LayerCommon;
@@ -48,7 +49,7 @@ namespace XCount
         private const string ClrTemp = "/xcclear";
 
         // 监听器
-        public PCWatcher watcher;
+        public static PCWatcher watcher;
 
         // UI注册
         private DalamudPluginInterface PluginInterface { get; init; }
@@ -64,30 +65,10 @@ namespace XCount
 
         private static List<Drawing3DCircularSectorO> Drawings = new();
 
-        // Service
-        [PluginService]
-        [RequiredVersion("1.0")]
-        public static Framework Framework { get; private set; } = null!;
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        public static ObjectTable ObjectTable { get; private set; } = null!;
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        public static ChatGui ChatGui { get; private set; } = null!;
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        public static GameGui GameGui { get; private set; } = null!;
-
         [PluginService]
         [RequiredVersion("1.0")]
         public static DtrBar DtrBar { get; private set; } = null!;
 
-        [PluginService]
-        [RequiredVersion("1.0")]
-        public static ClientState ClientState { get; private set; } = null!;
 
         public static XIVPainter.XIVPainter Painter;
 
@@ -107,7 +88,8 @@ namespace XCount
 
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
-            ECommons.ECommonsMain.Init(pluginInterface, this);
+            ECommons.ECommonsMain.Init(pluginInterface, this, Module.All);
+            ;
             Painter = XIVPainter.XIVPainter.Create(pluginInterface, "%NAME%");
             Painter.Enable = Configuration.EnablePainter;
             chat = new Chat();
@@ -117,6 +99,7 @@ namespace XCount
             var image = this.PluginInterface.UiBuilder.LoadImage(imagePath);
             watcher = new PCWatcher(this);
             watcher.Enable();
+
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this, image);
             PlayerListWindow = new PlayerListWindow(this);
@@ -124,7 +107,7 @@ namespace XCount
             WindowSystem.AddWindow(MainWindow);
             WindowSystem.AddWindow(PlayerListWindow);
             // 初始化警报器
-            if (Configuration.enableAlert)
+            if (Configuration.EnableAlert)
             {
                 StaticUtil.EnableAlertChat = true;
             }
@@ -218,7 +201,7 @@ namespace XCount
 
         public void sendChatMsg()
         {
-            chat.SendMessage(CountResults.ResultString(Configuration.chatStr));
+            chat.SendMessage(CountResults.ResultString(Configuration.ChatStr));
         }
 
         private void OnCommand(string command, string args)
@@ -240,11 +223,11 @@ namespace XCount
             }
             else if (command == CountPlayerCMD)
             {
-                ChatGui.Print($"周围玩家数量：{CountResults.CountAll}");
+                Svc.Chat.Print($"周围玩家数量：{CountResults.CountsDict["<all>"]}");
             }
             else if (command == CountNoWarCMD)
             {
-                ChatGui.Print($"周围非战职玩家数量：{CountResults.CountNoWar}");
+                Svc.Chat.Print($"周围非战职玩家数量：{CountResults.CountsDict["<nowar>"]}");
             }
             else if (command == SendChat)
             {
@@ -268,43 +251,64 @@ namespace XCount
 
         private void drawPlayers(object _, object __)
         {
-            if(!Configuration.EnablePainter) return;
+            if (!Configuration.EnablePainter) return;
             if (Drawings.Any())
             {
                 Painter.RemoveDrawings(Drawings.ToArray());
                 Drawings.Clear();
             }
 
-            if (CountResults.DrawAdvCharacters.Count != 0 && Configuration.enableGMDraw)
+            if (watcher.GMsCharacters.Count != 0 && Configuration.EnableGMDraw)
             {
-                foreach (PlayerCharacter advPlayer in CountResults.DrawAdvCharacters)
+                foreach (PlayerCharacter advPlayer in watcher.GMsCharacters)
                 {
-                    Drawings.Add(new Drawing3DCircularSectorO(advPlayer, 0.125f,
-                                                              ImGui.ColorConvertFloat4ToU32(
-                                                                  new Vector4(1f, 0.5f, 0.4f, 0.15f)), 1));
+                    Drawings.Add(new Drawing3DCircularSectorO(advPlayer, Configuration.DrawRadius,
+                                                              ImGui.ColorConvertFloat4ToU32(Configuration.DrawColor),
+                                                              Configuration.DrawWeight));
                 }
             }
 
-            if (Configuration.enableDrawInvis)
+            if (Configuration.EnableDrawInvis)
             {
-                foreach (PlayerCharacter invPlayer in CountResults.DrawInvCharacters)
+                foreach (PlayerCharacter invPlayer in watcher.invPlayers)
                 {
-                    Drawings.Add(new Drawing3DCircularSectorO(invPlayer, 0.125f,
-                                                              ImGui.ColorConvertFloat4ToU32(
-                                                                  new Vector4(1f, 0.5f, 0.4f, 0.15f)), 1));
+                    Drawings.Add(new Drawing3DCircularSectorO(invPlayer, Configuration.DrawRadius,
+                                                              ImGui.ColorConvertFloat4ToU32(Configuration.DrawColor),
+                                                              Configuration.DrawWeight));
                 }
             }
 
             if (Configuration.DrawExcel)
             {
-                foreach (PlayerCharacter excelPlayer in CountResults.DrawExcelCharacters)
+                foreach (PlayerCharacter excelPlayer in watcher.excelPlayers)
                 {
-                    Drawings.Add(new Drawing3DCircularSectorO(excelPlayer, 0.125f,
-                                                                     ImGui.ColorConvertFloat4ToU32(
-                                                                         new Vector4(1f, 0f, 0f, 0.2f)), 1));
+                    Drawings.Add(new Drawing3DCircularSectorO(excelPlayer, Configuration.DrawRadius,
+                                                              ImGui.ColorConvertFloat4ToU32(Configuration.DrawColor),
+                                                              Configuration.DrawWeight));
                 }
             }
-            if(Drawings.Any()) Painter.AddDrawings(Drawings.ToArray());
+
+            if (Configuration.EnableDrawEnemies)
+            {
+                foreach (var player in watcher.enemyPlayers)
+                {
+                    Drawings.Add(new Drawing3DCircularSectorO(player, Configuration.DrawRadius,
+                                                              ImGui.ColorConvertFloat4ToU32(Configuration.DrawColor),
+                                                              Configuration.DrawWeight));
+                }
+            }
+
+            if (Configuration.EnableDrawTargetU)
+            {
+                foreach (PlayerCharacter player in watcher.targetPlayers)
+                {
+                    Drawings.Add(new Drawing3DCircularSectorO(player, Configuration.DrawRadius,
+                                                              ImGui.ColorConvertFloat4ToU32(Configuration.DrawColor),
+                                                              Configuration.DrawWeight));
+                }
+            }
+
+            if (Drawings.Any()) Painter.AddDrawings(Drawings.ToArray());
         }
     }
 }

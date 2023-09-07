@@ -24,7 +24,7 @@ public class ConfigWindow : Window, IDisposable
     {
         Size = new Vector2(320, ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight() * 18);
         SizeCondition = ImGuiCond.Once;
-        watcher = plugin.watcher;
+        watcher = XCPlugin.watcher;
         Configuration = plugin.Configuration;
         this.plugin = plugin;
     }
@@ -49,23 +49,7 @@ public class ConfigWindow : Window, IDisposable
                     plugin.PlayerListWindow.IsOpen = isDisplayList;
                 }
 
-                var enablePainter=plugin.Configuration.EnablePainter;
-                if (ImGui.Checkbox("启用绘制功能", ref enablePainter))
-                {
-                    plugin.Configuration.EnablePainter = enablePainter;
-                    XCPlugin.Painter.Enable = enablePainter;
-                    plugin.Configuration.Save();
-                }
-
-                var enableDrawInv = Configuration.enableDrawInvis;
-                if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
-                {
-                    Configuration.enableDrawInvis = enableDrawInv;
-                    Configuration.Save();
-                }
-
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("当玩家在过场动画/切换区域加载时/其他情况下，\n其模型会不可见，勾选此项会把这样的玩家画出来");
+                
 
                 var isEnable = Configuration.EnablePlugin;
                 if (ImGui.Checkbox("开启计数", ref isEnable))
@@ -86,10 +70,10 @@ public class ConfigWindow : Window, IDisposable
                     Configuration.Save();
                 }
 
-                var enableTempStat = Configuration.tempStat;
+                var enableTempStat = Configuration.TempStat;
                 if (ImGui.Checkbox("合并统计", ref enableTempStat))
                 {
-                    Configuration.tempStat = enableTempStat;
+                    Configuration.TempStat = enableTempStat;
                     // 如果合并统计关闭，则清空计数
                     if (!enableTempStat)
                     {
@@ -104,20 +88,20 @@ public class ConfigWindow : Window, IDisposable
                     watcher.clearTemp();
                 }
 
-                var enableNameSrarch = Configuration.enableNameSrarch;
-                var enableAlert = Configuration.enableAlert;
+                var enableNameSrarch = Configuration.EnableNameSrarch;
+                var enableAlert = Configuration.EnableAlert;
                 if (ImGui.Checkbox("搜索id", ref enableNameSrarch))
                 {
-                    Configuration.enableNameSrarch = enableNameSrarch;
+                    Configuration.EnableNameSrarch = enableNameSrarch;
                     Configuration.Save();
                 }
 
-                if (Configuration.enableNameSrarch)
+                if (Configuration.EnableNameSrarch)
                 {
-                    var nameListStr = Configuration.nameListStr;
+                    var nameListStr = Configuration.NameListStr;
                     if (ImGui.InputText("查找名单", ref nameListStr, 200))
                     {
-                        Configuration.nameListStr = nameListStr;
+                        Configuration.NameListStr = nameListStr;
                         Configuration.Save();
                     }
 
@@ -125,7 +109,7 @@ public class ConfigWindow : Window, IDisposable
                         ImGui.SetTooltip("输入玩家完整名称（不需要服务器），可输入多个，不支持模糊查找");
                     if (ImGui.Checkbox("开启警报", ref enableAlert))
                     {
-                        Configuration.enableAlert = enableAlert;
+                        Configuration.EnableAlert = enableAlert;
                         StaticUtil.EnableAlertChat = enableAlert;
                         Configuration.Save();
                     }
@@ -159,10 +143,10 @@ public class ConfigWindow : Window, IDisposable
 
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip(CountResults.HelpMsg());
-                    var unionStr = Configuration.unionStr;
+                    var unionStr = Configuration.UnionStr;
                     if (ImGui.InputText("合并统计字符串", ref unionStr, 200))
                     {
-                        Configuration.unionStr = unionStr;
+                        Configuration.UnionStr = unionStr;
                         Configuration.Save();
                     }
 
@@ -170,10 +154,10 @@ public class ConfigWindow : Window, IDisposable
                         ImGui.SetTooltip("只有当合并统计被开启时，才会显示在状态栏中的字符串\n占位符规则和状态栏字符串一样");
                 }
 
-                var chatStr = Configuration.chatStr;
+                var chatStr = Configuration.ChatStr;
                 if (ImGui.InputText("发送命令", ref chatStr, 200))
                 {
-                    Configuration.chatStr = chatStr;
+                    Configuration.ChatStr = chatStr;
                     Configuration.Save();
                 }
 
@@ -188,27 +172,83 @@ public class ConfigWindow : Window, IDisposable
                     ImGui.SetTooltip("使用命令/xcchat也可以发送哦");
                 ImGui.EndTabItem();
             }
+            if (ImGui.BeginTabItem("绘制设置"))
+            {
+                var enablePainter = plugin.Configuration.EnablePainter;
+                if (ImGui.Checkbox("启用绘制功能", ref enablePainter))
+                {
+                    plugin.Configuration.EnablePainter = enablePainter;
+                    XCPlugin.Painter.Enable = enablePainter;
+                    plugin.Configuration.Save();
+                }
 
+                var enableDrawInv = Configuration.EnableDrawInvis;
+                if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
+                {
+                    Configuration.EnableDrawInvis = enableDrawInv;
+                    Configuration.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("当玩家在过场动画/切换区域加载时/其他情况下，\n其模型会不可见，勾选此项会把这样的玩家画出来");
+
+                var enableDrawEnemy = Configuration.EnableDrawEnemies;
+                if (ImGui.Checkbox("绘制敌人", ref enableDrawEnemy))
+                {
+                    Configuration.EnableDrawEnemies = enableDrawEnemy;
+                    Configuration.Save();
+                }
+
+                var enableDrawTargetU = Configuration.EnableDrawTargetU;
+                if (ImGui.Checkbox("绘制以你为目标的人", ref enableDrawTargetU))
+                {
+                    Configuration.EnableDrawTargetU = enableDrawTargetU;
+                    Configuration.Save();
+                }
+                var drawRadius = Configuration.DrawRadius;
+                if (ImGui.InputFloat("绘制半径", ref drawRadius))
+                {
+                    Configuration.DrawRadius = drawRadius;
+                    Configuration.Save();
+                }
+
+                var drawWeight = Configuration.DrawWeight;
+                if (ImGui.InputFloat("绘制厚度", ref drawWeight))
+                {
+                    Configuration.DrawWeight = drawWeight;
+                    Configuration.Save();
+                }
+                
+                // 颜色选择器
+                var drawColor = Configuration.DrawColor;
+                if (ImGui.ColorEdit4("绘制颜色", ref drawColor))
+                {
+                    Configuration.DrawColor = drawColor;
+                    Configuration.Save();
+                }
+
+
+                ImGui.EndTabItem();
+            }
             if (ImGui.BeginTabItem("人数警报"))
             {
-                var enableCountAlert = Configuration.enableCountAlert;
+                var enableCountAlert = Configuration.EnableCountAlert;
                 if (ImGui.Checkbox("开启人数警报", ref enableCountAlert))
                 {
-                    Configuration.enableCountAlert = enableCountAlert;
+                    Configuration.EnableCountAlert = enableCountAlert;
                     Configuration.Save();
                 }
 
-                var alertCount = Configuration.alertCount;
+                var alertCount = Configuration.AlertCount;
                 if (ImGui.InputInt("人数警报阈值", ref alertCount))
                 {
-                    Configuration.alertCount = alertCount;
+                    Configuration.AlertCount = alertCount;
                     Configuration.Save();
                 }
 
-                var countAlertRepeat = Configuration.countAlertRepeat;
+                var countAlertRepeat = Configuration.CountAlertRepeat;
                 if (ImGui.InputInt("人数警报重复间隔（秒）", ref countAlertRepeat))
                 {
-                    Configuration.countAlertRepeat = countAlertRepeat;
+                    Configuration.CountAlertRepeat = countAlertRepeat;
                     Configuration.Save();
                 }
 
@@ -219,35 +259,35 @@ public class ConfigWindow : Window, IDisposable
 
             if (ImGui.BeginTabItem("GM警报"))
             {
-                var enableGmDraw = Configuration.enableGMDraw;
+                var enableGmDraw = Configuration.EnableGMDraw;
                 if (ImGui.Checkbox("开启GM绘制", ref enableGmDraw))
                 {
-                    Configuration.enableGMDraw = enableGmDraw;
+                    Configuration.EnableGMDraw = enableGmDraw;
                     Configuration.Save();
                 }
 
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("此设置独立于下面一条设置");
-                var enableGmAlert = Configuration.enableGMAlert;
+                var enableGmAlert = Configuration.EnableGMAlert;
                 if (ImGui.Checkbox("开启GM警报", ref enableGmAlert))
                 {
-                    Configuration.enableGMAlert = enableGmAlert;
+                    Configuration.EnableGMAlert = enableGmAlert;
                     Configuration.Save();
                 }
 
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("通过OnlineStatus判断GM");
-                var gmAlertStr = Configuration.gmAlertStr;
+                var gmAlertStr = Configuration.GmAlertStr;
                 if (ImGui.InputText("GM警报内容", ref gmAlertStr, 500))
                 {
-                    Configuration.gmAlertStr = gmAlertStr;
+                    Configuration.GmAlertStr = gmAlertStr;
                     Configuration.Save();
                 }
 
-                var gmAlertRepeat = Configuration.gmAlertRepeat;
+                var gmAlertRepeat = Configuration.GmAlertRepeat;
                 if (ImGui.InputInt("GM警报重复间隔（秒）", ref gmAlertRepeat))
                 {
-                    Configuration.gmAlertRepeat = gmAlertRepeat;
+                    Configuration.GmAlertRepeat = gmAlertRepeat;
                     Configuration.Save();
                 }
 

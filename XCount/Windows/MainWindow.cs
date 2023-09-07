@@ -54,16 +54,16 @@ public class MainWindow : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("使用命令/xcchat也可以发送哦");
-        ImGui.TextColored(ImGuiColors.DalamudRed, $"周边玩家总数 {CountResults.CountAll}");
-        ImGui.Text($"战职玩家总数 {CountResults.CountWar}");
-        ImGui.Text($"生产采集总数 {CountResults.CountNoWar}");
-        ImGui.Text($"跨服玩家总数 {CountResults.TravelPlayer}");
-        if (Plugin.Configuration.tempStat)
+        ImGui.TextColored(ImGuiColors.DalamudRed, $"周边玩家总数 {CountResults.CountsDict["<all>"]}");
+        ImGui.Text($"战职玩家总数 {CountResults.CountsDict["<war>"]}");
+        ImGui.Text($"生产采集总数 {CountResults.CountsDict["<nowar>"]}");
+        ImGui.Text($"跨服玩家总数 {CountResults.CountsDict["<foreign>"]}");
+        if (Plugin.Configuration.TempStat)
         {
-            ImGui.Text($"累计玩家计数 {CountResults.UnionPlayer}");
+            ImGui.Text($"累计玩家计数 {CountResults.CountsDict["<union>"]}");
         }
 
-        if (Plugin.Configuration.enableNameSrarch)
+        if (Plugin.Configuration.EnableNameSrarch)
         {
             ImGui.TextColored(ImGuiColors.DalamudRed, $"玩家搜索结果");
             ImGui.TextColored(ImGuiColors.DalamudYellow, CountResults.resultListStr.ToString());

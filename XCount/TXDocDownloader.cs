@@ -1,3 +1,4 @@
+using ECommons.DalamudServices;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ namespace XCount
                     }
                     else if ((DateTime.Now - startTime).TotalSeconds > 30)
                     {
-                        XCPlugin.ChatGui.PrintError("下载文件超时");
+                        Svc.Chat.PrintError("下载文件超时");
                         return; // 退出方法，不抛出异常
                     }
                 }
@@ -89,23 +90,23 @@ namespace XCount
                                 await ms.CopyToAsync(fs);
                             }
                         }
-                        XCPlugin.ChatGui.Print("下载成功，文件名: " + fileName);
+                        Svc.Chat.Print("下载成功，文件名: " + fileName);
                         FileName = StaticUtil.IsFileExists(XCPlugin.PluginPath, "TXList", "xlsx");
                     }
                     else
                     {
-                        XCPlugin.ChatGui.PrintError("下载文件时出错，下载excel文件不成功");
+                        Svc.Chat.PrintError("下载文件时出错，下载excel文件不成功");
                     }
                 }
                 else
                 {
-                    XCPlugin.ChatGui.PrintError("下载文件地址获取失败，下载excel文件不成功");
+                    Svc.Chat.PrintError("下载文件地址获取失败，下载excel文件不成功");
                 }
             }
             catch (Exception e)
             {
                 // 处理异常情况，如记录日志、通知用户等
-                XCPlugin.ChatGui.PrintError("下载文件时出现异常（这个问题出现的最常见原因是Cookies过期）：" + e.Message);
+                Svc.Chat.PrintError("下载文件时出现异常（这个问题出现的最常见原因是Cookies过期）：" + e.Message);
             }
         }
 

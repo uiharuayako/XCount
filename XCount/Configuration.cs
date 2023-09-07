@@ -2,6 +2,7 @@ using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace XCount
 {
@@ -16,42 +17,46 @@ namespace XCount
         public string dtrStr { get; set; } = "人数:<all>";
 
         // 名单检测
-        public bool enableNameSrarch { get; set; } = false;
+        public bool EnableNameSrarch { get; set; } = false;
 
         // 是否画出不可见玩家
-        public bool enableDrawInvis { get; set; } = false;
+        public bool EnableDrawInvis { get; set; } = false;
+        // 是否画出PVP中的敌人
+        public bool EnableDrawEnemies { get; set; } = false;
+        // 是否画出以你为目标的玩家
+        public bool EnableDrawTargetU { get; set; } = false;
 
         // 开启警报（搜索id警报）
-        public bool enableAlert { get; set; } = false;
+        public bool EnableAlert { get; set; } = false;
 
-        public string nameListStr { get; set; } = "";
+        public string NameListStr { get; set; } = "";
 
         // 开启警报（人数警报）
-        public bool enableCountAlert { get; set; } = false;
-        public int countAlertRepeat { get; set; } = 0;
+        public bool EnableCountAlert { get; set; } = false;
+        public int CountAlertRepeat { get; set; } = 0;
 
-        public int alertCount { get; set; } = 200;
+        public int AlertCount { get; set; } = 200;
 
         // GM警报
-        public bool enableGMAlert { get; set; } = true;
+        public bool EnableGMAlert { get; set; } = true;
 
-        public bool enableGMDraw { get; set; } = true;
+        public bool EnableGMDraw { get; set; } = true;
 
         // 警报内容
-        public string gmAlertStr { get; set; } = "/e 兄弟们有TMD GM在附近<se.1>!!!";
+        public string GmAlertStr { get; set; } = "/e 兄弟们有TMD GM在附近<se.1>!!!";
 
-        public int gmAlertRepeat { get; set; } = 0;
+        public int GmAlertRepeat { get; set; } = 0;
 
         // 发送聊天
-        public string chatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
+        public string ChatStr { get; set; } = "/e 附近总人数<all>，非战职人数<nowar>";
 
         // 临时统计（合并统计）
-        public bool tempStat { get; set; } = false;
+        public bool TempStat { get; set; } = false;
 
-        public string unionStr { get; set; } = " 合并统计:<union>";
+        public string UnionStr { get; set; } = " 合并统计:<union>";
 
         // 开启按距离排序
-        public bool enableDistanceSort { get; set; } = true;
+        public bool EnableDistanceSort { get; set; } = true;
 
         public bool EnableOnlineList=false;
         // 腾讯文档参数
@@ -67,6 +72,9 @@ namespace XCount
 
         // 绘制功能
         public bool EnablePainter { get; set; } = false;
+        public float DrawRadius { get; set; } = 0.4f;
+        public float DrawWeight { get; set; } = 0.5f;
+        public Vector4 DrawColor { get; set; } = new Vector4(1, 0, 0, 1);
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]

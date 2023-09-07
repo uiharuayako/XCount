@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Colors;
+using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 
 namespace XCount.Windows
@@ -32,7 +33,7 @@ namespace XCount.Windows
         {
             Configuration = plugin.Configuration;
             this.plugin = plugin;
-            watcher = plugin.watcher;
+            watcher = XCPlugin.watcher;
             searchName = "";
             searchFC = "";
             searchNameList = new List<PlayerCharacter>();
@@ -47,18 +48,18 @@ namespace XCount.Windows
         {
             try
             {
-                bool enableSort = plugin.Configuration.enableDistanceSort;
+                bool enableSort = plugin.Configuration.EnableDistanceSort;
                 if (ImGui.Checkbox("按距离排序", ref enableSort))
                 {
-                    plugin.Configuration.enableDistanceSort = enableSort;
+                    plugin.Configuration.EnableDistanceSort = enableSort;
                     plugin.Configuration.Save();
                 }
 
                 ImGui.SameLine();
                 string serverName = "未知";
-                if (XCPlugin.ClientState.LocalPlayer.CurrentWorld.GameData != null)
+                if (Svc.ClientState.LocalPlayer.CurrentWorld.GameData != null)
                 {
-                    serverName = XCPlugin.ClientState.LocalPlayer.CurrentWorld.GameData.Name;
+                    serverName = Svc.ClientState.LocalPlayer.CurrentWorld.GameData.Name;
                 }
 
                 ImGui.Text($"当前服务器：{serverName}");
