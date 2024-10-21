@@ -12,34 +12,34 @@ namespace XCount
 {
     public class PCWatcher : IDisposable
     {
-        public IEnumerable<PlayerCharacter> playerCharacters;
-        public List<PlayerCharacter> travelPlayers;
-        public List<PlayerCharacter> unDowPlayers;
-        public List<PlayerCharacter> GMsCharacters;
-        public List<PlayerCharacter> invPlayers;
-        public List<PlayerCharacter> excelPlayers;
-        public List<PlayerCharacter> enemyPlayers;
-        public List<PlayerCharacter> targetPlayers;
-        public Dictionary<string, PlayerCharacter> tempPlayersDict;
+        public IEnumerable<IPlayerCharacter> playerCharacters;
+        public List<IPlayerCharacter> travelPlayers;
+        public List<IPlayerCharacter> unDowPlayers;
+        public List<IPlayerCharacter> GMsCharacters;
+        public List<IPlayerCharacter> invPlayers;
+        public List<IPlayerCharacter> excelPlayers;
+        public List<IPlayerCharacter> enemyPlayers;
+        public List<IPlayerCharacter> targetPlayers;
+        public Dictionary<string, IPlayerCharacter> tempPlayersDict;
         private XCPlugin plugin = null!;
 
         public PCWatcher(XCPlugin plugin)
         {
-            travelPlayers = new List<PlayerCharacter>();
-            unDowPlayers = new List<PlayerCharacter>();
-            GMsCharacters = new List<PlayerCharacter>();
-            invPlayers = new List<PlayerCharacter>();
-            excelPlayers = new List<PlayerCharacter>();
-            enemyPlayers = new List<PlayerCharacter>();
-            targetPlayers = new List<PlayerCharacter>();
+            travelPlayers = new List<IPlayerCharacter>();
+            unDowPlayers = new List<IPlayerCharacter>();
+            GMsCharacters = new List<IPlayerCharacter>();
+            invPlayers = new List<IPlayerCharacter>();
+            excelPlayers = new List<IPlayerCharacter>();
+            enemyPlayers = new List<IPlayerCharacter>();
+            targetPlayers = new List<IPlayerCharacter>();
             CountResults.isUpdate = false;
-            tempPlayersDict = new Dictionary<string, PlayerCharacter>();
+            tempPlayersDict = new Dictionary<string, IPlayerCharacter>();
             this.plugin = plugin;
         }
 
         private IntPtr _funcCanAttack;
 
-        public unsafe bool CanAttack(PlayerCharacter character)
+        public unsafe bool CanAttack(IPlayerCharacter character)
         {
             if (character == null) return false;
 
@@ -60,7 +60,7 @@ namespace XCount
             if (Svc.ClientState.LocalPlayer == null) return;
             if (!Svc.ClientState.LocalPlayer.IsCharacterVisible()) return;
             // 获取玩家列表
-            playerCharacters = Svc.Objects.OfType<PlayerCharacter>().Where(pc => pc.ObjectId != 3758096384);
+            playerCharacters = Svc.Objects.OfType<IPlayerCharacter>().Where(pc => pc.GameObjectId != 3758096384);
             travelPlayers.Clear();
             unDowPlayers.Clear();
             GMsCharacters.Clear();
@@ -74,7 +74,7 @@ namespace XCount
                 playerCharacters = playerCharacters.OrderBy(StaticUtil.DistanceToPlayer);
             }
 
-            foreach (PlayerCharacter character in playerCharacters)
+            foreach (IPlayerCharacter character in playerCharacters)
             {
                 // 合并搜索部分
                 if (plugin.Configuration.TempStat && CountResults.CountsDict["<union>"] < 9999)
@@ -121,8 +121,8 @@ namespace XCount
                 // 谁是GM
                 unsafe
                 {
-                    if (((Character*)(character.Address))->OnlineStatus <= 3 &&
-                        ((Character*)(character.Address))->OnlineStatus > 0)
+                    if (((Character*)(character.Address))->CharacterData.OnlineStatus <= 3 &&
+                        ((Character*)(character.Address))->CharacterData.OnlineStatus > 0)
                     {
                         GMsCharacters.Add(character);
                     }
@@ -226,10 +226,10 @@ namespace XCount
 
         public void clearTemp()
         {
-            Dalamud.Logging.PluginLog.Log($"人数{tempPlayersDict.Count}");
+            Svc.Log.Info($"人数{tempPlayersDict.Count}");
             if (tempPlayersDict.Count > 0)
             {
-                Dalamud.Logging.PluginLog.Log("清空人数");
+                Svc.Log.Info("清空人数");
                 tempPlayersDict.Clear();
             }
         }

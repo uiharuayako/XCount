@@ -18,8 +18,8 @@ namespace XCount.Windows
         private Configuration Configuration;
         private PCWatcher watcher;
         private XCPlugin plugin;
-        private List<PlayerCharacter> searchNameList;
-        private List<PlayerCharacter> searchFCList;
+        private List<IPlayerCharacter> searchNameList;
+        private List<IPlayerCharacter> searchFCList;
         private string searchName;
 
         private string searchFC;
@@ -36,8 +36,8 @@ namespace XCount.Windows
             watcher = XCPlugin.watcher;
             searchName = "";
             searchFC = "";
-            searchNameList = new List<PlayerCharacter>();
-            searchFCList = new List<PlayerCharacter>();
+            searchNameList = new List<IPlayerCharacter>();
+            searchFCList = new List<IPlayerCharacter>();
             displayAll = true;
             displayHistory = false;
         }
@@ -164,7 +164,7 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                             ImGui.Text(Math.Round(player.Position.Z, 3).ToString());
                             ImGui.NextColumn();
-                            ImGui.Text(player.ObjectId.ToString());
+                            ImGui.Text(player.DataId.ToString());
                             ImGui.NextColumn();
                             bool visible = player.IsCharacterVisible();
                             ImGui.TextColored(visible ? ImGuiColors.HealerGreen : ImGuiColors.DPSRed,
@@ -247,7 +247,7 @@ namespace XCount.Windows
                             ImGui.NextColumn();
                             ImGui.Text(StaticUtil.DistanceToPlayer(player).ToString());
                             ImGui.NextColumn();
-                            ImGui.Text(player.ObjectId.ToString());
+                            ImGui.Text(player.DataId.ToString());
                             ImGui.NextColumn();
                         }
 
@@ -325,7 +325,7 @@ namespace XCount.Windows
                                 ImGui.NextColumn();
                                 ImGui.Text(StaticUtil.DistanceToPlayer(player).ToString());
                                 ImGui.NextColumn();
-                                ImGui.Text(player.ObjectId.ToString());
+                                ImGui.Text(player.DataId.ToString());
                                 ImGui.NextColumn();
                             }
 
@@ -404,7 +404,7 @@ namespace XCount.Windows
                                 ImGui.NextColumn();
                                 ImGui.Text(StaticUtil.DistanceToPlayer(player).ToString());
                                 ImGui.NextColumn();
-                                ImGui.Text(player.ObjectId.ToString());
+                                ImGui.Text(player.DataId.ToString());
                                 ImGui.NextColumn();
                             }
 
@@ -417,7 +417,7 @@ namespace XCount.Windows
             }
             catch (Exception e)
             {
-                Dalamud.Logging.PluginLog.Log($"切换区域异常{e.Message}");
+                Svc.Log.Info($"切换区域异常{e.Message}");
             }
         }
     }

@@ -14,7 +14,7 @@ namespace XCount
     {
         public static bool EnableAlertChat=false;
 
-        public static float DistanceToPlayer(PlayerCharacter obj)
+        public static float DistanceToPlayer(IPlayerCharacter obj)
         {
             if (obj == null) return 0;
             Vector3 objPosition = new(obj.Position.X, obj.Position.Y, obj.Position.Z);

@@ -5,6 +5,8 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using ImGuiNET;
@@ -14,9 +16,9 @@ namespace XCount.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private TextureWrap Image;
+    private string Image;
     private XCPlugin Plugin;
-    public MainWindow(XCPlugin plugin, TextureWrap image) : base(
+    public MainWindow(XCPlugin plugin, string image) : base(
         "XCount", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse|ImGuiWindowFlags.NoTitleBar)
     {
         this.SizeConstraints = new WindowSizeConstraints
@@ -31,12 +33,17 @@ public class MainWindow : Window, IDisposable
 
     public void Dispose()
     {
-        this.Image.Dispose();
+        
     }
 
     public override void Draw()
     {
-        ImGui.Image(this.Image.ImGuiHandle, new Vector2(30, 30));
+        var imageTex=Svc.Texture.GetFromFile(Image).GetWrapOrDefault();
+        if (imageTex != null)
+        {
+            ImGui.Image(imageTex.ImGuiHandle, new Vector2(30, 30));
+        }
+        
         ImGui.SameLine();
         if (ImGui.Button("设置"))
         {
@@ -69,8 +76,8 @@ public class MainWindow : Window, IDisposable
             ImGui.TextColored(ImGuiColors.DalamudYellow, CountResults.resultListStr.ToString());
         }
 #if DEBUG
-        ImGui.Text($"周边物体总数 {XCPlugin.ObjectTable.Count()}");
-        PlayerCharacter me = XCPlugin.ClientState.LocalPlayer;
+        ImGui.Text($"周边物体总数 {Svc.Objects.Count()}");
+        PlayerCharacter me = Svc.ClientState.LocalPlayer;
         ImGui.Text($"初始世界：{me.CurrentWorld.GameData.Name}");
         ImGui.Text($"职业：{me.ClassJob.GameData.Name}，{me.ClassJob.GameData.DohDolJobIndex}");
 #endif

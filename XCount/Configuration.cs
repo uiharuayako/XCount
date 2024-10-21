@@ -70,17 +70,11 @@ namespace XCount
         public int ServerCol = 2;
         public bool AutoUpdateTXDoc = false;
 
-        // 绘制功能
-        public bool EnablePainter { get; set; } = false;
-        public float DrawRadius { get; set; } = 0.4f;
-        public float DrawWeight { get; set; } = 0.5f;
-        public Vector4 DrawColor { get; set; } = new Vector4(1, 0, 0, 1);
-
         // the below exist just to make saving less cumbersome
         [NonSerialized]
-        private DalamudPluginInterface? PluginInterface;
+        private IDalamudPluginInterface? PluginInterface;
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(IDalamudPluginInterface pluginInterface)
         {
             this.PluginInterface = pluginInterface;
         }

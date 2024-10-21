@@ -172,63 +172,6 @@ public class ConfigWindow : Window, IDisposable
                     ImGui.SetTooltip("使用命令/xcchat也可以发送哦");
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("绘制设置"))
-            {
-                var enablePainter = plugin.Configuration.EnablePainter;
-                if (ImGui.Checkbox("启用绘制功能", ref enablePainter))
-                {
-                    plugin.Configuration.EnablePainter = enablePainter;
-                    XCPlugin.Painter.Enable = enablePainter;
-                    plugin.Configuration.Save();
-                }
-
-                var enableDrawInv = Configuration.EnableDrawInvis;
-                if (ImGui.Checkbox("绘制不可见玩家", ref enableDrawInv))
-                {
-                    Configuration.EnableDrawInvis = enableDrawInv;
-                    Configuration.Save();
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("当玩家在过场动画/切换区域加载时/其他情况下，\n其模型会不可见，勾选此项会把这样的玩家画出来");
-
-                var enableDrawEnemy = Configuration.EnableDrawEnemies;
-                if (ImGui.Checkbox("绘制敌人", ref enableDrawEnemy))
-                {
-                    Configuration.EnableDrawEnemies = enableDrawEnemy;
-                    Configuration.Save();
-                }
-
-                var enableDrawTargetU = Configuration.EnableDrawTargetU;
-                if (ImGui.Checkbox("绘制以你为目标的人", ref enableDrawTargetU))
-                {
-                    Configuration.EnableDrawTargetU = enableDrawTargetU;
-                    Configuration.Save();
-                }
-                var drawRadius = Configuration.DrawRadius;
-                if (ImGui.InputFloat("绘制半径", ref drawRadius))
-                {
-                    Configuration.DrawRadius = drawRadius;
-                    Configuration.Save();
-                }
-
-                var drawWeight = Configuration.DrawWeight;
-                if (ImGui.InputFloat("绘制厚度", ref drawWeight))
-                {
-                    Configuration.DrawWeight = drawWeight;
-                    Configuration.Save();
-                }
-                
-                // 颜色选择器
-                var drawColor = Configuration.DrawColor;
-                if (ImGui.ColorEdit4("绘制颜色", ref drawColor))
-                {
-                    Configuration.DrawColor = drawColor;
-                    Configuration.Save();
-                }
-
-
-                ImGui.EndTabItem();
-            }
             if (ImGui.BeginTabItem("人数警报"))
             {
                 var enableCountAlert = Configuration.EnableCountAlert;
@@ -411,7 +354,5 @@ public class ConfigWindow : Window, IDisposable
 
             ImGui.EndTabBar();
         }
-
-        ImGui.End();
     }
 }
